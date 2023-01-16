@@ -1,23 +1,23 @@
-#include "s21_optional.h"
+#include "optional.h"
 
 // заполняет структуру 0
-void s21_value_reset(s21_decimal *dst) {
+void my_value_reset(my_decimal *dst) {
   if (dst) {
     char *pdst = (char *)dst;
-    for (int i = 0; i < S21_SIZE_BYTES; i++, pdst++) *pdst = 0;
+    for (int i = 0; i < SIZE_BYTES; i++, pdst++) *pdst = 0;
   }
 }
 
 // копирует одну структуру в другую
-void s21_copy_decimal(s21_decimal value, s21_decimal *result) {
+void my_copy_decimal(my_decimal value, my_decimal *result) {
   if (result) {
     char *pval = (char *)&value, *pres = (char *)result;
-    for (int i = 0; i < S21_SIZE_BYTES; i++, pval++, pres++) *pres = *pval;
+    for (int i = 0; i < SIZE_BYTES; i++, pval++, pres++) *pres = *pval;
   }
 }
 
 // устанавливает bit бит 32-битного слова word значением value
-void s21_set_bit(s21_decimal *src, unsigned char word, unsigned char bit,
+void my_set_bit(my_decimal *src, unsigned char word, unsigned char bit,
                  unsigned char value) {
   if (src) {
     int res = 0;
@@ -28,9 +28,9 @@ void s21_set_bit(s21_decimal *src, unsigned char word, unsigned char bit,
 }
 
 // выводит на экран весь децимал в 2чной системе
-void s21_print_decimal_bits(s21_decimal dst) {
+void my_print_decimal_bits(my_decimal dst) {
   printf("=========\n");
-  printf("s21_print_decimal_bits:\nmastissa mask: \n");
+  printf("my_print_decimal_bits:\nmastissa mask: \n");
   printf("N word  |  %3i%3c  |  %3i%3c  |  %3i%3c  |  %3i%3c  |\n", 3, ' ', 2,
          ' ', 1, ' ', 0, ' ');
   for (int i = 0; i < 4; i++) {
@@ -38,7 +38,7 @@ void s21_print_decimal_bits(s21_decimal dst) {
     for (int j = 0; j < 4; j++) {
       printf(" ");
       for (int k = 0; k < 8; k++) {
-        printf("%u", s21_get_bit_2Dim(dst, 3 - i, (3 - j) * 8 + 7 - k));
+        printf("%u", get_bit_2Dim(dst, 3 - i, (3 - j) * 8 + 7 - k));
       }
       printf(" |");
     }
@@ -47,28 +47,27 @@ void s21_print_decimal_bits(s21_decimal dst) {
   char strValue[100] = {0};
   char strValue1[100] = {0};
 
-  char _exp = s21_getDecimalExp(dst);
-  s21_decimalToString(strValue, dst);
-  char *sign = (S21_GET_SIGN(dst)) ? "-" : "";
+  char _exp = getDecimalExp(dst);
+  decimalToString(strValue, dst);
+  char *sign = (GET_SIGN(dst)) ? "-" : "";
   strcpy(strValue1, strValue);
   for (int i = 0; i < 8; i++) {
-    s21_set_bit(&dst, 3, i + 16, 0);
+    my_set_bit(&dst, 3, i + 16, 0);
   }
-  s21_decimalToString(strValue1, dst);
+  decimalToString(strValue1, dst);
   printf("mantissa value: %s\n", strValue1);
   printf("exponenta: 10^(-%i)\n", _exp);
-  // printf("\n\n");
   printf("\nvalue: %s%s\n========\n\n", sign, strValue);
 }
 
 // устанавливает в структуру нужную степень
-void s21_set_exp(s21_decimal *src, int powsrc) {
+void my_set_exp(my_decimal *src, int powsrc) {
   if (src) {
     src->bits[3] = src->bits[3] & (~0u << 24);  // обнуляем биты с 0 до 23
     int num = powsrc;
     for (int i = 112; i < 119; i++) {
       if (num % 2 == 1) {
-        s21_set_bit(src, i / 32, i % 32, 1);
+        my_set_bit(src, i / 32, i % 32, 1);
       }
       num = num / 2;
     }
@@ -77,11 +76,11 @@ void s21_set_exp(s21_decimal *src, int powsrc) {
 
 // извлечение значения указанного бита (от 0 до 31) для указанного 32-битного
 // слова (от 0 до 3)
-int s21_get_bit_2Dim(s21_decimal value, uint8 nWord, int nBit) {
+int my_get_bit_2Dim(my_decimal value, uint8 nWord, int nBit) {
   int res = -1;  // значение -1 означает ошибку допустимых значений индексов
-  if (nWord < (uint8)(sizeof(s21_decimal) / sizeof(value.bits[0])) &&
+  if (nWord < (uint8)(sizeof(my_decimal) / sizeof(value.bits[0])) &&
       (nBit >= 0) &&
-      (nBit < (int)(sizeof(value.bits[0]) * S21_BYTE_BIT_LENGTH))) {
+      (nBit < (int)(sizeof(value.bits[0]) * BYTE_BIT_LENGTH))) {
     unsigned int temp = value.bits[nWord] & (1 << nBit);
     res = temp >> nBit;
   }
@@ -89,58 +88,58 @@ int s21_get_bit_2Dim(s21_decimal value, uint8 nWord, int nBit) {
 }
 
 // извлечение значения указанного бита по индексу бита в структуре (от 0 до 127)
-int s21_get_bit_byIndex(s21_decimal value, int nBit) {
+int my_get_bit_byIndex(my_decimal value, int nBit) {
   int res = -1;  // -1 означает ошибку допустимых значений индексов
-  if ((nBit >= 0) || (nBit < (int)(sizeof(s21_decimal) * sizeof(char) *
-                                   S21_BYTE_BIT_LENGTH))) {
-    int _nWord = nBit / (int)(sizeof(value.bits[0]) * S21_BYTE_BIT_LENGTH);
-    int _nBit = nBit % (int)(sizeof(value.bits[0]) * S21_BYTE_BIT_LENGTH);
-    res = s21_get_bit_2Dim(value, _nWord, _nBit);
+  if ((nBit >= 0) || (nBit < (int)(sizeof(my_decimal) * sizeof(char) *
+                                   BYTE_BIT_LENGTH))) {
+    int _nWord = nBit / (int)(sizeof(value.bits[0]) * BYTE_BIT_LENGTH);
+    int _nBit = nBit % (int)(sizeof(value.bits[0]) * BYTE_BIT_LENGTH);
+    res = my_get_bit_2Dim(value, _nWord, _nBit);
   }
   return res;
 }
 
-void s21_set_bit_byIndex(s21_decimal *value, int nBit, unsigned char bitValue) {
+void my_set_bit_byIndex(my_decimal *value, int nBit, unsigned char bitValue) {
   if (value) {
-    if ((nBit >= 0) || (nBit < (int)(sizeof(s21_decimal) * sizeof(char) *
-                                     S21_BYTE_BIT_LENGTH))) {
-      int _nWord = nBit / (int)(sizeof(value->bits[0]) * S21_BYTE_BIT_LENGTH);
-      int _nBit = nBit % (int)(sizeof(value->bits[0]) * S21_BYTE_BIT_LENGTH);
-      s21_set_bit(value, _nWord, _nBit, bitValue);
+    if ((nBit >= 0) || (nBit < (int)(sizeof(my_decimal) * sizeof(char) *
+                                     BYTE_BIT_LENGTH))) {
+      int _nWord = nBit / (int)(sizeof(value->bits[0]) * BYTE_BIT_LENGTH);
+      int _nBit = nBit % (int)(sizeof(value->bits[0]) * BYTE_BIT_LENGTH);
+      my_set_bit(value, _nWord, _nBit, bitValue);
     }
   }
 }
 
 // извлечение значения степени при основании 10 из числа decimal
-unsigned char s21_getDecimalExp(s21_decimal value) {
+unsigned char my_getDecimalExp(my_decimal value) {
   unsigned char res = 0;
-  for (int i = 0; i < S21_EXP_LEN; i++) {
-    res += s21_get_bit_byIndex(value, i + 112) * pow(2, i);
+  for (int i = 0; i < EXP_LEN; i++) {
+    res += my_get_bit_byIndex(value, i + 112) * pow(2, i);
   }
   return res;
 }
 
 // преобразование числа decimal к строковому виду, для читабельного вывода и
 // арифметики
-void s21_decimalToString(char *strValue, s21_decimal value) {
+void my_decimalToString(char *strValue, my_decimal value) {
   if (strValue) {
-    unsigned char _exp = s21_getDecimalExp(value);
+    unsigned char _exp = my_getDecimalExp(value);
 
     // для расчета знчения степени двойки
-    char powerOfTwoString[S21_MAX_STRING_CONVERTATION_LENGTH] =
+    char powerOfTwoString[MAX_STRING_CONVERTATION_LENGTH] =
         "1";  // инициализация стартового значением результатом 2^0 = 1
-    char powerOfTwoStringInverse[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char powerOfTwoStringInverse[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
     // для расчета итогового значения
-    char tempString[S21_MAX_STRING_CONVERTATION_LENGTH] = "0";
+    char tempString[MAX_STRING_CONVERTATION_LENGTH] = "0";
 
-    // char tempStringInverse[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    // char tempStringInverse[my_MAX_STRING_CONVERTATION_LENGTH] = {0};
 
     // подготовка регистра к новой итерации расчета степени двойки
     strcpy(tempString, "0");
 
     // перебор целочисленной части числа децимал
-    for (int i = 0; i < S21_MANTISSA_LEN; i++) {
+    for (int i = 0; i < MANTISSA_LEN; i++) {
       uint8 overflowNumber = 0;
 
       char shortMultiplicator = 2;  // число, на которое производится умножение
@@ -163,28 +162,28 @@ void s21_decimalToString(char *strValue, s21_decimal value) {
       powerOfTwoStringInverse[len] = 0;
 
       // чтение результата с конца строки
-      s21_stringReverse(powerOfTwoStringInverse, powerOfTwoString);
+      stringReverse(powerOfTwoStringInverse, powerOfTwoString);
 
       // если в битовой маске числа, анализируемый бит равен 1, то к
       // накопленному результату прибавить её вес.
-      if (s21_get_bit_byIndex(value, i))
-        s21_addStringDecimal(tempString, powerOfTwoString);
+      if (my_get_bit_byIndex(value, i))
+        addStringDecimal(tempString, powerOfTwoString);
     }
 
     // установка точки на нужное место
-    s21_setPoint(tempString, _exp);
-    s21_truncateZeros(tempString);
+    setPoint(tempString, _exp);
+    truncateZeros(tempString);
     strcpy(strValue, tempString);
   }
 }
 
 // переворачивание строки (предназначен для оперирования только символами из
 // ASCII таблицы)
-void s21_stringReverse(const char *source, char *destination) {
+void my_stringReverse(const char *source, char *destination) {
   if (source && destination) {
     int i = (int)strlen(source) - 1;
     int k = 0;
-    while (i >= 0 && source[i] && k < S21_MAX_STRING_CONVERTATION_LENGTH - 1) {
+    while (i >= 0 && source[i] && k < MAX_STRING_CONVERTATION_LENGTH - 1) {
       destination[k++] = source[i];
       i--;
     }
@@ -193,8 +192,8 @@ void s21_stringReverse(const char *source, char *destination) {
 }
 
 // установка десятичной точки на требуемую поозицию
-void s21_setPoint(char *strValue, char pointPosition) {
-  char tempString[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+void my_setPoint(char *strValue, char pointPosition) {
+  char tempString[MAX_STRING_CONVERTATION_LENGTH] = {0};
   if (strValue) {
     if ((int)strlen(strValue) > pointPosition) {
       if (pointPosition > 0) {
@@ -232,22 +231,22 @@ void s21_setPoint(char *strValue, char pointPosition) {
 }
 
 // сумма только положительных чисел
-char *s21_addStringDecimal(char *value1, char *value2) {
+char *my_addStringDecimal(char *value1, char *value2) {
   if (value1 && value2) {
     if (!strcmp(value1, "0")) {
       strcpy(value1, value2);
     } else if (!strcmp(value2, "0")) {
       strcpy(value2, value1);
     } else {
-      char value2copy[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char value2copy[MAX_STRING_CONVERTATION_LENGTH] = {0};
       strcpy(value2copy, value2);
-      s21_preformatStringDecimal(value1, value2copy);
+      preformatStringDecimal(value1, value2copy);
       int index = 0;
       while (value1[index] && value1[index] != '.') {
         index++;
       }
 
-      char resultReverseString[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char resultReverseString[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
       uint8 _overflow = 0;
       for (int i = strlen(value1), j = 0; --i >= 0;) {
@@ -265,24 +264,24 @@ char *s21_addStringDecimal(char *value1, char *value2) {
         resultReverseString[len++] = _overflow + '0';
       }
       resultReverseString[len] = 0;
-      s21_stringReverse(resultReverseString, value1);
-      s21_truncateZeros(value1);
+      my_stringReverse(resultReverseString, value1);
+      truncateZeros(value1);
     }
   }
   return value1;
 }
 
 // todo приведение к одной длине целочисленной и дробной частей без учета знака
-void s21_preformatStringDecimal(char *value1, char *value2) {
-  char t_value[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+void my_preformatStringDecimal(char *value1, char *value2) {
+  char t_value[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
   if (value1 && value2) {
     char *p_forIncreasePart = NULL;
 
-    char integerPartValue1[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-    char integerPartValue2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-    char fractionalPartValue1[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-    char fractionalPartValue2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char integerPartValue1[MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char integerPartValue2[MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char fractionalPartValue1[MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char fractionalPartValue2[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
     strcpy(integerPartValue1, strtok(value1, "."));
     char *_fractionalPartValue1 = strtok(NULL, ".");
@@ -356,24 +355,24 @@ void s21_preformatStringDecimal(char *value1, char *value2) {
 
 // перевод децимальной строки в число (заведомо корректное число, фильтрация на
 // уровень выше)
-void s21_stringToDecimal(s21_decimal *value, const char *strValue) {
+void my_stringToDecimal(my_decimal *value, const char *strValue) {
   if (strValue && value) {
-    char _strValue[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _strValue[MAX_STRING_CONVERTATION_LENGTH] = {0};
     strcpy(_strValue, strValue);
-    s21_truncateZeros(_strValue);
+    truncateZeros(_strValue);
     if (!strcmp(_strValue, "0")) {
-      s21_value_reset(value);
+      my_value_reset(value);
     } else {
       // извлечения точности во входном числе
-      int precision = s21_extractPrecision(_strValue);
+      int precision = extractPrecision(_strValue);
 
       int _sign = 0;
       int index = 0;
-      char _temp[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-      char _temp2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-      char _tempReg[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char _temp[MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char _temp2[MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char _tempReg[MAX_STRING_CONVERTATION_LENGTH] = {0};
       // удаление точки -> перевод к целому числу
-      s21_dropPrecisionPoint(_temp, _strValue);
+      dropPrecisionPoint(_temp, _strValue);
       if (_temp[0] == '-') {
         _sign = 1;
         index++;
@@ -385,42 +384,42 @@ void s21_stringToDecimal(s21_decimal *value, const char *strValue) {
 
       int integerPart = (int)strlen(_temp2) - precision;
 
-      if (integerPart > S21_MAX_EXP + 1) {
-        strcpy(_tempReg, S21_MAX_DECIMAL);
+      if (integerPart > MAX_EXP + 1) {
+        strcpy(_tempReg, MAX_DECIMAL);
       } else {
-        if (commonLen > S21_MAX_EXP) {
-          precision = S21_MAX_EXP - integerPart + 1;
-          strncpy(_tempReg, _temp2, S21_MAX_EXP + 1);
-          if (_temp2[S21_MAX_EXP + 1] > '4') {
-            s21_addStringDecimal(_tempReg, "1");
+        if (commonLen > MAX_EXP) {
+          precision = MAX_EXP - integerPart + 1;
+          strncpy(_tempReg, _temp2, MAX_EXP + 1);
+          if (_temp2[MAX_EXP + 1] > '4') {
+            my_addStringDecimal(_tempReg, "1");
           }
-          if (strcmp(_tempReg, S21_MAX_DECIMAL) > 0) {
+          if (strcmp(_tempReg, MAX_DECIMAL) > 0) {
             if (precision) {
-              char _tempRound[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-              char integer[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+              char _tempRound[MAX_STRING_CONVERTATION_LENGTH] = {0};
+              char integer[MAX_STRING_CONVERTATION_LENGTH] = {0};
               char *pInteger = &integer[0];
               char fractional[2] = {0};
               char *pFractional = &fractional[0];
               precision--;
-              s21_dropPrecisionPoint(_tempRound, _tempReg);
-              s21_setPoint(_tempRound, 1);
+              dropPrecisionPoint(_tempRound, _tempReg);
+              my_setPoint(_tempRound, 1);
               pInteger = strtok(_tempRound, ".");
               pFractional = strtok(NULL, ".");
               if (*pFractional - '0' >= 5) {
-                s21_addStringDecimal(pInteger, "1");
+                my_addStringDecimal(pInteger, "1");
               }
               strcpy(_tempReg, pInteger);
-              s21_setPoint(_tempRound, precision);
+              my_setPoint(_tempRound, precision);
             } else {
-              strcpy(_tempReg, S21_MAX_DECIMAL);
+              strcpy(_tempReg, MAX_DECIMAL);
             }
           }
-          s21_truncateZeros(_tempReg);
+          truncateZeros(_tempReg);
         } else {
           strcpy(_tempReg, _temp2);
         }
-        char _bitmaskRev[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-        char _bitmask[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+        char _bitmaskRev[MAX_STRING_CONVERTATION_LENGTH] = {0};
+        char _bitmask[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
         // данные в _temp и index больше не нужны, переменные отдаются на
         // управление сборjv битовой маски
@@ -438,20 +437,20 @@ void s21_stringToDecimal(s21_decimal *value, const char *strValue) {
             _temp[i + 1] = 0;
           }
 
-          s21_truncateZeros(_temp);
+          truncateZeros(_temp);
           strcpy(_tempReg, _temp);
           _bitmaskRev[index++] = (remainder) ? '1' : '0';
         }
 
-        s21_value_reset(value);
-        s21_stringReverse(_bitmaskRev, _bitmask);
-        strncpy(_bitmask, _bitmaskRev, S21_MANTISSA_LEN);
+        my_value_reset(value);
+        my_stringReverse(_bitmaskRev, _bitmask);
+        strncpy(_bitmask, _bitmaskRev, MANTISSA_LEN);
         for (unsigned long int i = 0; i < strlen(_bitmaskRev);) {
-          s21_set_bit_byIndex(value, i, _bitmaskRev[i] - '0');
+          my_set_bit_byIndex(value, i, _bitmaskRev[i] - '0');
           i++;
         }
-        s21_set_exp(value, precision);
-        S21_SET_SIGN(value, _sign);
+        my_set_exp(value, precision);
+        SET_SIGN(value, _sign);
       }
     }
   }
@@ -459,13 +458,13 @@ void s21_stringToDecimal(s21_decimal *value, const char *strValue) {
 
 // удаление оконечных нулей (предназначено для работы с числом, у которого есть
 // дробная часть)
-void s21_truncateZeros(char *strValue) {
-  char _tempReversed[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char _temp[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+void my_truncateZeros(char *strValue) {
+  char _tempReversed[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _temp[MAX_STRING_CONVERTATION_LENGTH] = {0};
   if (strValue) {
     char *addr;
     if (strchr(strValue, '.')) {
-      s21_stringReverse(strValue, _tempReversed);
+      my_stringReverse(strValue, _tempReversed);
       addr = &_tempReversed[0];
       // усечение дробной составляющей
       while (*addr && ((*addr == '0') || (*addr == '.'))) {
@@ -473,7 +472,7 @@ void s21_truncateZeros(char *strValue) {
       }
       strcpy(_temp, addr);
       strcpy(_tempReversed, "");
-      s21_stringReverse(_temp, _tempReversed);
+      my_stringReverse(_temp, _tempReversed);
       strcpy(strValue, _tempReversed);
 
       if (strchr(strValue, '.')) {
@@ -502,7 +501,7 @@ void s21_truncateZeros(char *strValue) {
 }
 
 // получение информации о текущей точности числа
-int s21_extractPrecision(const char *value) {
+int my_extractPrecision(const char *value) {
   int precision = 0;
   if (value && strchr(value, '.'))
     precision = (int)strlen(value) - (int)(strchr(value, '.') - value) - 1;
@@ -510,9 +509,9 @@ int s21_extractPrecision(const char *value) {
 }
 
 // удаление точки дробной составляющей
-char *s21_dropPrecisionPoint(char *destination, const char *src) {
+char *my_dropPrecisionPoint(char *destination, const char *src) {
   if (destination && src) {
-    char _temp[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _temp[MAX_STRING_CONVERTATION_LENGTH] = {0};
     char *pointer = &_temp[0];
     strcpy(_temp, src);
     pointer = strtok(_temp, ".");
@@ -523,30 +522,30 @@ char *s21_dropPrecisionPoint(char *destination, const char *src) {
   return destination;
 }
 
-char *s21_divideStringDecimal(char *x, const char *y) {
+char *my_divideStringDecimal(char *x, const char *y) {
   // используется, чтобы привести к одному положению десятичной точки (число с
   // плавающей запятой)
-  char _x[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char _y[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _x[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _y[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
   // используется, чтобы хранить мантиссу (целочисленное значение)
-  char _x2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char _y2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _x2[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _y2[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
   if (x && y) {
     strcpy(_x, x);
     strcpy(_y, y);
 
     // приводим к одной десятиричной маске
-    s21_preformatStringDecimal(_x, _y);
+    my_preformatStringDecimal(_x, _y);
 
     // удаляем точку, делаем значение целочисленным
-    s21_dropPrecisionPoint(_x2, _x);
-    s21_dropPrecisionPoint(_y2, _y);
+    my_dropPrecisionPoint(_x2, _x);
+    my_dropPrecisionPoint(_y2, _y);
 
     // отбрасываем лишние нули слева (не нужны при делении и умножении)
-    s21_truncateZeros(_x2);
-    s21_truncateZeros(_y2);
+    my_truncateZeros(_x2);
+    my_truncateZeros(_y2);
 
     // считаем длину мантиссы для делимого и делителя (в символах)
     int lenX = (int)strlen(_x2);
@@ -564,11 +563,11 @@ char *s21_divideStringDecimal(char *x, const char *y) {
     int _resIndex = 0;
 
     // результат деления
-    char _res[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _res[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
     // часть числа, соответствующая остатку с предыдущего шага с добавлением
     // следующего десятичного разряда
-    char _part[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _part[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
     // инициализация _part куском от X, для которого будет вычисляться остаток
     // при делении на _y
@@ -580,9 +579,9 @@ char *s21_divideStringDecimal(char *x, const char *y) {
     // пока {не набралось достаточное количество десятичных символов в выводе}
     // && {результат не равен 0}
     while ((index < lenX) || (((int)strlen(_res) <
-                               S21_MAX_EXP + 3) /*&& (strcmp(_part, "0"))*/)) {
-      char _sub[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-      char _y3[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+                               MAX_EXP + 3) /*&& (strcmp(_part, "0"))*/)) {
+      char _sub[MAX_STRING_CONVERTATION_LENGTH] = {0};
+      char _y3[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
       // копирование очередного остатка предыдущего шага с добавлением соседнего
       // разряда
@@ -592,11 +591,11 @@ char *s21_divideStringDecimal(char *x, const char *y) {
       strcpy(_y3, _y2);
 
       // исключение лишних нулей
-      s21_truncateZeros(_y3);
-      s21_truncateZeros(_sub);
+      my_truncateZeros(_y3);
+      my_truncateZeros(_sub);
 
       // приводим к одной десятиричной маске
-      s21_preformatStringDecimal(_sub, _y3);
+      my_preformatStringDecimal(_sub, _y3);
 
       // если первое число больше или равно второму, то выполнить деление
       if (strcmp(_sub, _y3) >= 0) {
@@ -613,8 +612,8 @@ char *s21_divideStringDecimal(char *x, const char *y) {
 
           // регистры, чтобы не затереть _part и _y2 в результате последующих
           // преобразований
-          char _tempX[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-          char _tempY[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+          char _tempX[MAX_STRING_CONVERTATION_LENGTH] = {0};
+          char _tempY[MAX_STRING_CONVERTATION_LENGTH] = {0};
           strcpy(_tempX, _sub);
           strcpy(_tempY, _y3);
 
@@ -623,8 +622,8 @@ char *s21_divideStringDecimal(char *x, const char *y) {
           snprintf(strDivisor, 3, "%d", divisor);
 
           // оценка делителя
-          s21_mulStringDecimal(_tempY, strDivisor);
-          s21_preformatStringDecimal(_tempX, _tempY);
+          mulStringDecimal(_tempY, strDivisor);
+          my_preformatStringDecimal(_tempX, _tempY);
           if (strcmp(_tempX, _tempY) >= 0) {
             // данный делитель подходит, разряд текущей итерации оставляем
           } else {
@@ -635,8 +634,8 @@ char *s21_divideStringDecimal(char *x, const char *y) {
         char strDivisor[3] = {0};
         strcpy(_y3, _y2);
         snprintf(strDivisor, 2, "%d", divisor);
-        s21_mulStringDecimal(_y3, strDivisor);
-        s21_subStringDecimal(_part, _y3);
+        mulStringDecimal(_y3, strDivisor);
+        subStringDecimal(_part, _y3);
       } else {
         _res[_resIndex++] = '0';
       }
@@ -649,26 +648,26 @@ char *s21_divideStringDecimal(char *x, const char *y) {
       int len = (int)strlen(_part);
       _part[len++] = nextSymbolForConcatenate;
       _part[len] = '\0';
-      s21_truncateZeros(_part);
+      my_truncateZeros(_part);
     }
     strcpy(x, _res);
   }
   return x;
 }
 
-char *s21_subStringDecimal(char *strValue1, const char *strValue2) {
-  // strValue1 всегда больше strValue2. Числа всегда полжоительные
+char *my_subStringDecimal(char *strValue1, const char *strValue2) {
+  // strValue1 всегда больше strValue2. Числа всегда положительные
   // отсечка знака идет на уровень выше, как и сортировка чисел при подаче в эту
   // функцию
 
   if (strValue1 && strValue2) {
-    char _temp[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _temp[MAX_STRING_CONVERTATION_LENGTH] = {0};
     strcpy(_temp, strValue2);
     if (!((strlen(strValue1) == strlen(_temp)) &&
-          (s21_extractPrecision(strValue1) == s21_extractPrecision(_temp)))) {
-      s21_preformatStringDecimal(strValue1, _temp);
+          (my_extractPrecision(strValue1) == my_extractPrecision(_temp)))) {
+      my_preformatStringDecimal(strValue1, _temp);
     }
-    char _tempRev[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+    char _tempRev[MAX_STRING_CONVERTATION_LENGTH] = {0};
     uint8 overflowSymbol = 0;
     for (int i = strlen(strValue1), k = 0; --i >= 0; k++) {
       char symbol = 0;
@@ -688,69 +687,69 @@ char *s21_subStringDecimal(char *strValue1, const char *strValue2) {
       }
     }
     strcpy(strValue1, "");
-    s21_stringReverse(_tempRev, strValue1);
+    my_stringReverse(_tempRev, strValue1);
   }
   return strValue1;
 }
 
 // функция проверки значения на допустимый диапазон и экпорт значения из строки
 // в децимал
-int s21_processingMathResultAndWriteOutputRegister(s21_decimal *targetRegister,
+int my_processingMathResultAndWriteOutputRegister(my_decimal *targetRegister,
                                                    const char *sourceStr,
                                                    uint8 sign) {
   int _res = CALCULATION_OK;
-  char temp1[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char temp2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char temp3[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char tempMax[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char tempMin[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char temp1[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char temp2[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char temp3[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char tempMax[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char tempMin[MAX_STRING_CONVERTATION_LENGTH] = {0};
 
   // проверка на сверхбольшое число по модулю
   strcpy(temp1, sourceStr);
   strcpy(temp2, sourceStr);
   strcpy(temp3, sourceStr);
-  strcpy(tempMax, S21_MAX_DECIMAL);
-  strcpy(tempMin, S21_MIN_DECIMAL);
+  strcpy(tempMax, MAX_DECIMAL);
+  strcpy(tempMin, MIN_DECIMAL);
 
-  s21_preformatStringDecimal(temp1, tempMax);
-  s21_truncateZeros(temp2);
-  s21_preformatStringDecimal(temp3, tempMin);
+  my_preformatStringDecimal(temp1, tempMax);
+  my_truncateZeros(temp2);
+  my_preformatStringDecimal(temp3, tempMin);
   if (strcmp(temp1, tempMax) > 0) {
     // превышено максимальное возможное значение
     _res = (sign) ? TOO_SMALL_OR_NEG_INF : TOO_LARGE_OR_INF;
-    strcpy(temp1, S21_MAX_DECIMAL);
+    strcpy(temp1, MAX_DECIMAL);
     if (targetRegister) {
-      s21_stringToDecimal(targetRegister, temp1);
-      S21_SET_SIGN(targetRegister, sign);
+      my_stringToDecimal(targetRegister, temp1);
+      SET_SIGN(targetRegister, sign);
     }
   } else if (!strcmp(temp2, "0")) {
     // равно нулю
     strcpy(temp1, "0");
-    if (targetRegister) s21_stringToDecimal(targetRegister, temp1);
+    if (targetRegister) my_stringToDecimal(targetRegister, temp1);
   } else if (strcmp(temp3, tempMin) < 0) {
     // превышено минимальное возможное значение
     _res = TOO_SMALL_OR_NEG_INF;
     strcpy(temp1, "0");
-    if (targetRegister) s21_stringToDecimal(targetRegister, temp1);
+    if (targetRegister) my_stringToDecimal(targetRegister, temp1);
   }
   if (targetRegister && !_res) {
-    s21_stringToDecimal(targetRegister, temp1);  // todo
-    s21_set_bit(targetRegister, 3, 31, sign);
+    my_stringToDecimal(targetRegister, temp1);  // todo
+    my_set_bit(targetRegister, 3, 31, sign);
   }
   return _res;
 }
 
-int s21_mulStringDecimal(char *strValue1, char *strValue2) {
+int my_mulStringDecimal(char *strValue1, char *strValue2) {
   int _res = CALCULATION_OK;
-  char _strTemp1[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-  char _strTemp2[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _strTemp1[MAX_STRING_CONVERTATION_LENGTH] = {0};
+  char _strTemp2[MAX_STRING_CONVERTATION_LENGTH] = {0};
   if (strValue1 && strValue2) {
-    char precisionValue1 = s21_extractPrecision(strValue1);
-    char precisionValue2 = s21_extractPrecision(strValue2);
-    s21_dropPrecisionPoint(_strTemp1, strValue1);
-    s21_dropPrecisionPoint(_strTemp2, strValue2);
-    s21_truncateZeros(_strTemp1);
-    s21_truncateZeros(_strTemp2);
+    char precisionValue1 = my_extractPrecision(strValue1);
+    char precisionValue2 = my_extractPrecision(strValue2);
+    my_dropPrecisionPoint(_strTemp1, strValue1);
+    my_dropPrecisionPoint(_strTemp2, strValue2);
+    my_truncateZeros(_strTemp1);
+    my_truncateZeros(_strTemp2);
     strcpy(strValue1, "0");
 
     if (strcmp(_strTemp1, "0") && strcmp(_strTemp2, "0")) {
@@ -759,8 +758,8 @@ int s21_mulStringDecimal(char *strValue1, char *strValue2) {
       for (int j = strlen(_strTemp2), k = 0; --j >= 0; k++) {
         if (_strTemp2[j] != '0') {
           uint8 overflowNumber = 0;
-          char tempRegisterRev[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
-          char tempRegister[S21_MAX_STRING_CONVERTATION_LENGTH] = {0};
+          char tempRegisterRev[MAX_STRING_CONVERTATION_LENGTH] = {0};
+          char tempRegister[MAX_STRING_CONVERTATION_LENGTH] = {0};
           // перебор разрядов, начиная с младшего, первого множителя
           for (int i = strlen(_strTemp1), m = 0; --i >= 0; m++) {
             char decimalSymbol =
@@ -774,17 +773,17 @@ int s21_mulStringDecimal(char *strValue1, char *strValue2) {
           tempRegisterRev[len] = 0;
 
           // чтение результата с конца строки
-          s21_stringReverse(tempRegisterRev, tempRegister);
+          my_stringReverse(tempRegisterRev, tempRegister);
 
           for (int n = 0; n < k; n++) {
             strcat(tempRegister, "0");
           }
 
-          s21_addStringDecimal(strValue1, tempRegister);
+          my_addStringDecimal(strValue1, tempRegister);
         }
       }
-      s21_setPoint(strValue1, precisionValue1 + precisionValue2);
-      s21_truncateZeros(strValue1);
+      my_setPoint(strValue1, precisionValue1 + precisionValue2);
+      my_truncateZeros(strValue1);
     }
   }
   return _res;

@@ -1,9 +1,9 @@
-#include "s21_decimal.h"
+#include "my_decimal.h"
 
-int s21_from_int_to_decimal(int src, s21_decimal *dst) {
+int my_from_int_to_decimal(int src, my_decimal *dst) {
   int flag = CONVERTATION_OK;
   if (dst) {
-    s21_value_reset(dst);
+    value_reset(dst);
 
     if (src < 0) {
       if (src == INT_MIN) {
@@ -11,7 +11,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
       } else {
         dst->bits[0] = -src;
       }
-      S21_SET_SIGN(dst, 1);
+      SET_SIGN(dst, 1);
     } else {
       dst->bits[0] = src;
     }

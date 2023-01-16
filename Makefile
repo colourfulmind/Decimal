@@ -12,13 +12,13 @@ CSTANDARD=-std=c11 -pedantic
 DEBUG=-g
 
 # Исходные файлы
-SRC_FILES=s21_*.c
+SRC_FILES=my_*.c
 
 # Заголовочные файлы
-HDR_FILES=s21_*.h
+HDR_FILES=my_*.h
 
 # Имя собираемой статической библиотеки
-LIBNAME=s21_decimal.a
+LIBNAME=my_decimal.a
 
 # Тип операционной системы
 TYPE_OS=$(shell uname -s);
@@ -38,28 +38,28 @@ REPORT_NAME = report
 
 #-------------------------------------------
 
-SRCS = s21_add.c\
-	s21_sub.c\
-	s21_mul.c\
-	s21_div.c\
-	s21_mod.c\
-	s21_is_less.c\
-	s21_is_equal.c\
-	s21_from_int_to_decimal.c\
-	s21_from_float_to_decimal.c\
-	s21_from_decimal_to_int.c\
-	s21_from_decimal_to_float.c\
-	s21_floor.c\
-	s21_round.c\
-	s21_truncate.c\
-	s21_negate.c\
-	s21_optional.c
+SRCS = my_add.c\
+	my_sub.c\
+	my_mul.c\
+	my_div.c\
+	my_mod.c\
+	my_is_less.c\
+	my_is_equal.c\
+	from_int_to_decimal.c\
+	from_float_to_decimal.c\
+	from_decimal_to_int.c\
+	from_decimal_to_float.c\
+	my_floor.c\
+	my_round.c\
+	my_truncate.c\
+	my_negate.c\
+	optional.c
 
 TEST_FILE = test.c
 
 OBJST = $(SRCS:.c=.o)
 
-all: clean s21_decimal.a test gcov_report
+all: clean my_decimal.a test gcov_report
 
 objs: $(SRCS)
 	$(CC) $(CFLAGS) $(CSTANDARD) -c $(SRCS)
@@ -67,7 +67,7 @@ objs: $(SRCS)
 checkmk:
 	checkmk test.mkcheck > $(TEST_FILE)
 
-s21_decimal.a: objs
+my_decimal.a: objs
 	ar rc $(LIBNAME) $(OBJST)
 	ranlib $(LIBNAME)
 

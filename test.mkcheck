@@ -1,66 +1,66 @@
-#include "s21_decimal.h"
-#include "s21_optional.h"
+#include "my_decimal.h"
+#include "optional.h"
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
 
-#test s21_truncate_null
+#test my_truncate_null
 
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    ck_assert_int_eq(CALCULATION_OK, s21_truncate(d, &result));
+    my_decimal d = {0};
+    my_decimal result = {0};
+    ck_assert_int_eq(CALCULATION_OK, my_truncate(d, &result));
     ck_assert_int_eq(d.bits[0], result.bits[0]);
     ck_assert_int_eq(d.bits[1], result.bits[1]);
     ck_assert_int_eq(d.bits[2], result.bits[2]);
     ck_assert_int_eq(d.bits[3], result.bits[3]);
 
-#test s21_truncate_nok
+#test my_truncate_nok
 
-    s21_decimal d = {0};
-    ck_assert_int_eq(CALCULATION_ERROR, s21_truncate(d, NULL));
+    my_decimal d = {0};
+    ck_assert_int_eq(CALCULATION_ERROR, my_truncate(d, NULL));
 
     d.bits[0] = 0b11111111111111111111111111111111;
     d.bits[1] = 0b11111111111111111111111111111111;
     d.bits[2] = 0b11111111111111111111111111111111;
     d.bits[3] = 0b11111111111111111111111111111111;
-    s21_decimal res;
-    int _res = s21_truncate(d, &res);
+    my_decimal res;
+    int _res = my_truncate(d, &res);
     ck_assert_int_eq(CALCULATION_ERROR, _res);
 
-#test s21_truncate_max
-    s21_decimal d;
+#test my_truncate_max
+    my_decimal d;
     d.bits[0] = 0b11111111111111111111111111111111;
     d.bits[1] = 0b11111111111111111111111111111111;
     d.bits[2] = 0b11111111111111111111111111111111;
     d.bits[3] = 0b00000000000000010000000000000000;
-    s21_decimal result;
+    my_decimal result;
     result.bits[0] = 0b10011001100110011001100110011001;
     result.bits[1] = 0b10011001100110011001100110011001;
     result.bits[2] = 0b00011001100110011001100110011001;
     result.bits[3] = 0b00000000000000000000000000000000;
-    s21_decimal res;
-    int _res = s21_truncate(d, &res);
+    my_decimal res;
+    int _res = my_truncate(d, &res);
     ck_assert_int_eq(CALCULATION_OK, _res);
     ck_assert_int_eq(res.bits[0], result.bits[0]);
     ck_assert_int_eq(res.bits[1], result.bits[1]);
     ck_assert_int_eq(res.bits[2], result.bits[2]);
     ck_assert_int_eq(res.bits[3], result.bits[3]);
 
-#test s21_truncate_214
-    s21_decimal d;
+#test my_truncate_214
+    my_decimal d;
     d.bits[0] = 0b10000000000000000000000010100101;  // 214.7483813
     d.bits[1] = 0b00000000000000000000000000000000;
     d.bits[2] = 0b00000000000000000000000000000000;
     d.bits[3] = 0b00000000000001110000000000000000;
     float num = 0.0;
-    s21_from_decimal_to_float(d, &num);
-    s21_decimal result;
+    from_decimal_to_float(d, &num);
+    my_decimal result;
     result.bits[0] = 0b00000000000000000000000011010110;
     result.bits[1] = 0b00000000000000000000000000000000;
     result.bits[2] = 0b00000000000000000000000000000000;
     result.bits[3] = 0b00000000000000000000000000000000;
-    s21_decimal res;
-    s21_truncate(d, &res);
+    my_decimal res;
+    my_truncate(d, &res);
     ck_assert_int_eq(res.bits[0], result.bits[0]);
     ck_assert_int_eq(res.bits[1], result.bits[1]);
     ck_assert_int_eq(res.bits[2], result.bits[2]);
@@ -68,14 +68,14 @@
 
 
 
-#test s21_truncate_norm
-    s21_decimal src, origin;
+#test my_truncate_norm
+    my_decimal src, origin;
     src.bits[0] = 0b01001100110100101000000111000101;
     src.bits[1] = 0b00000000000000000000000000000010;
     src.bits[2] = 0b00000000000000000000000000000000;
     src.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_truncate(src, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = my_truncate(src, &result);
     origin.bits[0] = 0b01001100110100101000000111000101;
     origin.bits[1] = 0b00000000000000000000000000000010;
     origin.bits[2] = 0b00000000000000000000000000000000;
@@ -87,16 +87,16 @@
     ck_assert_int_eq(origin.bits[0], result.bits[0]);
 
 
-#test s21_truncate_simple
+#test my_truncate_simple
     int res = 0;
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+    my_decimal d = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
 
     // -2.4 => -2
-    s21_from_float_to_decimal(-2.4, &d);
-    s21_from_float_to_decimal(-2.0, &etalon);
-    res = s21_truncate(d, &result);
+    from_float_to_decimal(-2.4, &d);
+    from_float_to_decimal(-2.0, &etalon);
+    res = my_truncate(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -104,9 +104,9 @@
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // -1.6 => -1
-    s21_from_float_to_decimal(-1.6, &d);
-    s21_from_float_to_decimal(-1.0, &etalon);
-    res = s21_truncate(d, &result);
+    from_float_to_decimal(-1.6, &d);
+    from_float_to_decimal(-1.0, &etalon);
+    res = my_truncate(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -114,9 +114,9 @@
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 1.6 => 1
-    s21_from_float_to_decimal(1.6, &d);
-    s21_from_float_to_decimal(1.0, &etalon);
-    res = s21_truncate(d, &result);
+    from_float_to_decimal(1.6, &d);
+    from_float_to_decimal(1.0, &etalon);
+    res = my_truncate(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -124,9 +124,9 @@
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 2.4 => 2
-    s21_from_float_to_decimal(2.4, &d);
-    s21_from_float_to_decimal(2.0, &etalon);
-    res = s21_truncate(d, &result);
+    from_float_to_decimal(2.4, &d);
+    from_float_to_decimal(2.0, &etalon);
+    res = my_truncate(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -134,37 +134,37 @@
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_truncate_extreme
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_truncate_extreme
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_truncate(max, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal(max, result), TRUE);
-    ck_assert_int_eq(s21_truncate(min, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal(min, result), TRUE);
-    ck_assert_int_eq(s21_truncate(small, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){7}, result), TRUE);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_truncate(one, NULL), CALCULATION_ERROR);
-    ck_assert_int_eq(s21_truncate((s21_decimal){0}, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){0}, result), TRUE);
+    ck_assert_int_eq(my_truncate(max, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal(max, result), TRUE);
+    ck_assert_int_eq(my_truncate(min, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal(min, result), TRUE);
+    ck_assert_int_eq(my_truncate(small, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){7}, result), TRUE);
+    // my_print_decimal_bits(small);
+    // my_print_decimal_bits(result);
+    ck_assert_int_eq(my_truncate(one, NULL), CALCULATION_ERROR);
+    ck_assert_int_eq(my_truncate((my_decimal){0}, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){0}, result), TRUE);
 
 
-#test s21_sub_max
+#test my_sub_max
 // for example,
 // 79,228,162,514,264,337,593,543,950,335
 // - 0.6 =
@@ -174,15 +174,15 @@ char s1[] = "79228162514264337593543950335";
 char s2[] = "0.6";
 char s3[] = "79228162514264337593543950334";
 
-s21_decimal d1 = {0};
-s21_decimal d2 = {0};
-s21_decimal d3 = {0};
-s21_processingMathResultAndWriteOutputRegister(&d1, &s1[0], 1);
-s21_processingMathResultAndWriteOutputRegister(&d2, &s2[0], 1);
-s21_processingMathResultAndWriteOutputRegister(&d3, &s3[0], 1);
+my_decimal d1 = {0};
+my_decimal d2 = {0};
+my_decimal d3 = {0};
+my_processingMathResultAndWriteOutputRegister(&d1, &s1[0], 1);
+my_processingMathResultAndWriteOutputRegister(&d2, &s2[0], 1);
+my_processingMathResultAndWriteOutputRegister(&d3, &s3[0], 1);
 
-s21_decimal result;
-int res = s21_sub(d1, d2, &result);
+my_decimal result;
+int res = my_sub(d1, d2, &result);
 
 ck_assert_int_eq(ARITHMETIC_OK, res);
 
@@ -193,16 +193,16 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
 
 
 
-#test s21_sub_nok
+#test my_sub_nok
 
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    // s21_decimal res = {0};
-    ck_assert_int_eq(NULL_POINTER, s21_sub(d1, d2, NULL));
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    // my_decimal res = {0};
+    ck_assert_int_eq(NULL_POINTER, my_sub(d1, d2, NULL));
 
 
-#test s21_sub_993
-    s21_decimal d1, d2, etalon;
+#test my_sub_993
+    my_decimal d1, d2, etalon;
 
     d1.bits[0] = 0b00000000000000000000000000000010;
     d1.bits[1] = 0b00000000000000000000000000000000;
@@ -213,8 +213,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[1] = 0b00000000000000000000000000000000;
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b00000000000000000000000000000000;
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_sub(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    my_sub(d1, d2, &result);
 
     etalon.bits[0] = 0b00000000000000000000000000000010;
     etalon.bits[1] = 0b00000000000000000000000000000000;
@@ -226,8 +226,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_sub_1149
-    s21_decimal d1, d2, etalon;
+#test my_sub_1149
+    my_decimal d1, d2, etalon;
     // d1 = -9878798789;
     // d2 = -3;
 
@@ -240,8 +240,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[1] = 0b00000000000000000000000000000000;
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_sub(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    my_sub(d1, d2, &result);
 
     etalon.bits[0] = 0b01001100110100101000000111000010;
     etalon.bits[1] = 0b00000000000000000000000000000010;
@@ -253,8 +253,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_sub_1253
-    s21_decimal d1, d2, etalon;
+#test my_sub_1253
+    my_decimal d1, d2, etalon;
     // d1 = -545454512454545.35265454545645;
     // d2 = 54564654;
 
@@ -262,21 +262,21 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d1.bits[1] = 0b11111001111010000010010110101101;
     d1.bits[2] = 0b10110000001111101111000010010100;
     d1.bits[3] = 0b10000000000000000000000000000000;
-    s21_set_exp(&d1, 14);
+    set_exp(&d1, 14);
 
     d2.bits[0] = 0b00000011010000001001011100101110;
     d2.bits[1] = 0b00000000000000000000000000000000;
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b00000000000000000000000000000000;
-    s21_set_exp(&d2, 0);
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_sub(d1, d2, &result);
+    set_exp(&d2, 0);
+    my_decimal result = {{0, 0, 0, 0}};
+    my_sub(d1, d2, &result);
 
     etalon.bits[0] = 0b10010100100110011101101011101101;
     etalon.bits[1] = 0b11000101100100110110100101100010;
     etalon.bits[2] = 0b10110000001111101111000110111100;
     etalon.bits[3] = 0b10000000000011100000000000000000;
-    s21_set_exp(&etalon, 14);
+    set_exp(&etalon, 14);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[2], result.bits[2]);
@@ -284,8 +284,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_sub_1383
-    s21_decimal d1, d2, etalon;
+#test my_sub_1383
+    my_decimal d1, d2, etalon;
     // d1 = 12345677.987654345678987654346;
     // d2 = -87654323456.9876545678987653;
 
@@ -298,8 +298,8 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[1] = 0b11110101101111000110111111000000;
     d2.bits[2] = 0b00000010110101010000111100111111;
     d2.bits[3] = 0b10000000000100000000000000000000;
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_sub(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    my_sub(d1, d2, &result);
 
     etalon.bits[0] = 0b11010010000011011110010110111111;
     etalon.bits[1] = 0b10100111010011100111001000100001;
@@ -311,151 +311,151 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_sub_equal
-    s21_decimal d1 = {1, 0, 0, 0};
-    s21_decimal d2 = {1, 0, 0, 0};
-    s21_decimal result = {1, 0, 0, 0};
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(d1, d2, &result));
+#test my_sub_equal
+    my_decimal d1 = {1, 0, 0, 0};
+    my_decimal d2 = {1, 0, 0, 0};
+    my_decimal result = {1, 0, 0, 0};
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(d1, d2, &result));
     ck_assert_int_eq(0, result.bits[0]);
     ck_assert_int_eq(0, result.bits[1]);
     ck_assert_int_eq(0, result.bits[2]);
     ck_assert_int_eq(0, result.bits[3]);
 
 
-#test s21_sub_error
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_sub_error
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_sub(max, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(max, max, &result), ARITHMETIC_OK);
     ck_assert_int_eq(result.bits[0], 0);
     ck_assert_int_eq(result.bits[1], 0);
     ck_assert_int_eq(result.bits[2], 0);
     ck_assert_int_eq(result.bits[3], 0);
-    ck_assert_int_eq(s21_sub(max, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(one, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(max, one_neg, &result), TOO_LARGE_OR_INF);
-    ck_assert_int_eq(s21_sub(one_neg, max, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_sub(max, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(one, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(max, one_neg, &result), TOO_LARGE_OR_INF);
+    ck_assert_int_eq(my_sub(one_neg, max, &result), TOO_SMALL_OR_NEG_INF);
 
-    ck_assert_int_eq(s21_sub(max, min, &result), TOO_LARGE_OR_INF);
-    ck_assert_int_eq(s21_sub(min, max, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_sub(max, min, &result), TOO_LARGE_OR_INF);
+    ck_assert_int_eq(my_sub(min, max, &result), TOO_SMALL_OR_NEG_INF);
 
-    ck_assert_int_eq(s21_sub(min, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(min, min, &result), ARITHMETIC_OK);
     ck_assert_int_eq(result.bits[0], 0);
     ck_assert_int_eq(result.bits[1], 0);
     ck_assert_int_eq(result.bits[2], 0);
     ck_assert_int_eq(result.bits[3], 0);
-    ck_assert_int_eq(s21_sub(min, one, &result), TOO_SMALL_OR_NEG_INF);
-    ck_assert_int_eq(s21_sub(min, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(one, min, &result), TOO_LARGE_OR_INF);
-    ck_assert_int_eq(s21_sub(one_neg, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(small, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(small, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_sub(one, small, &result), ARITHMETIC_OK);
-    s21_sub(one_neg, small, &result);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(one_neg);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_sub(one_neg, small, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(min, one, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_sub(min, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(one, min, &result), TOO_LARGE_OR_INF);
+    ck_assert_int_eq(my_sub(one_neg, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(small, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(small, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_sub(one, small, &result), ARITHMETIC_OK);
+    my_sub(one_neg, small, &result);
+    // print_decimal_bits(small);
+    // print_decimal_bits(one_neg);
+    // print_decimal_bits(result);
+    ck_assert_int_eq(my_sub(one_neg, small, &result), ARITHMETIC_OK);
 
-#test s21_sub_null
-    s21_decimal d = {0};
-    s21_decimal result = {1,2,3,4};
-    ck_assert_int_eq(s21_sub(d, d, &result), ARITHMETIC_OK);
+#test my_sub_null
+    my_decimal d = {0};
+    my_decimal result = {1,2,3,4};
+    ck_assert_int_eq(my_sub(d, d, &result), ARITHMETIC_OK);
     ck_assert_int_eq(result.bits[0], 0);
     ck_assert_int_eq(result.bits[1], 0);
     ck_assert_int_eq(result.bits[2], 0);
     ck_assert_int_eq(result.bits[3], 0);
 
 
-#test s21_sub_sign
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+#test my_sub_sign
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
     int res = 0;
     float _result, _etalon;
     int _res, _eta;
 
-    s21_from_float_to_decimal(2.4, &d1);
-    s21_from_float_to_decimal(2.5, &d2);
-    s21_from_float_to_decimal(-0.1, &etalon);
-    res = s21_sub(d1, d2, &result);
+    from_float_to_decimal(2.4, &d1);
+    from_float_to_decimal(2.5, &d2);
+    from_float_to_decimal(-0.1, &etalon);
+    res = my_sub(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &_result);
-    s21_from_decimal_to_float(etalon, &_etalon);
+    from_decimal_to_float(result, &_result);
+    from_decimal_to_float(etalon, &_etalon);
     // ck_assert_float_eq(_result, _etalon);
 
-    s21_from_int_to_decimal(4, &d1);
-    s21_from_int_to_decimal(5, &d2);
-    s21_from_int_to_decimal(-1, &etalon);
-    res = s21_sub(d1, d2, &result);
+    from_int_to_decimal(4, &d1);
+    from_int_to_decimal(5, &d2);
+    from_int_to_decimal(-1, &etalon);
+    res = my_sub(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
     ck_assert_int_eq(_res, _eta);
-    res = s21_sub(d2, d1, &result);
-    s21_from_int_to_decimal(1, &etalon);
+    res = my_sub(d2, d1, &result);
+    from_int_to_decimal(1, &etalon);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
-    ck_assert_int_eq(_res, _eta);
-
-    s21_from_int_to_decimal(-4, &d1);
-    s21_from_int_to_decimal(5, &d2);
-    s21_from_int_to_decimal(-9, &etalon);
-    res = s21_sub(d1, d2, &result);
-    ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
-    ck_assert_int_eq(_res, _eta);
-    res = s21_sub(d2, d1, &result);
-    s21_from_int_to_decimal(9, &etalon);
-    ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
     ck_assert_int_eq(_res, _eta);
 
-    s21_from_int_to_decimal(-4, &d1);
-    s21_from_int_to_decimal(-5, &d2);
-    s21_from_int_to_decimal(1, &etalon);
-    res = s21_sub(d1, d2, &result);
+    from_int_to_decimal(-4, &d1);
+    from_int_to_decimal(5, &d2);
+    from_int_to_decimal(-9, &etalon);
+    res = my_sub(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
     ck_assert_int_eq(_res, _eta);
-    res = s21_sub(d2, d1, &result);
-    s21_from_int_to_decimal(-1, &etalon);
+    res = my_sub(d2, d1, &result);
+    from_int_to_decimal(9, &etalon);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    s21_from_decimal_to_int(result, &_res);
-    s21_from_decimal_to_int(etalon, &_eta);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
     ck_assert_int_eq(_res, _eta);
 
-#test s21_round_16
-    s21_decimal d1;
+    from_int_to_decimal(-4, &d1);
+    from_int_to_decimal(-5, &d2);
+    from_int_to_decimal(1, &etalon);
+    res = my_sub(d1, d2, &result);
+    ck_assert_int_eq(res, ARITHMETIC_OK);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
+    ck_assert_int_eq(_res, _eta);
+    res = my_sub(d2, d1, &result);
+    from_int_to_decimal(-1, &etalon);
+    ck_assert_int_eq(res, ARITHMETIC_OK);
+    from_decimal_to_int(result, &_res);
+    from_decimal_to_int(etalon, &_eta);
+    ck_assert_int_eq(_res, _eta);
+
+#test my_round_16
+    my_decimal d1;
     d1.bits[0] = 0b00000000000000000000000010100101;  // -16.5
     d1.bits[1] = 0b00000000000000000000000000000000;
     d1.bits[2] = 0b00000000000000000000000000000000;
     d1.bits[3] = 0b10000000000000010000000000000000;
-    s21_decimal etalon;
+    my_decimal etalon;
     etalon.bits[0] = 0b00000000000000000000000000010001;
     etalon.bits[1] = 0b00000000000000000000000000000000;
     etalon.bits[2] = 0b00000000000000000000000000000000;
     etalon.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal result;
-    int res = s21_round(d1, &result);
+    my_decimal result;
+    int res = my_round(d1, &result);
 
     ck_assert_int_eq(res, CALCULATION_OK);
 
@@ -466,7 +466,7 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
 
     d1.bits[3] = 0b10000000000000010000000000000000;
     etalon.bits[3] = 0b10000000000000000000000000000000;
-    res = s21_round(d1, &result);
+    res = my_round(d1, &result);
 
     ck_assert_int_eq(res, CALCULATION_OK);
 
@@ -477,27 +477,27 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
 
 
 
-#test s21_round_nok
-    s21_decimal d1;
+#test my_round_nok
+    my_decimal d1;
     d1.bits[0] = 0b00000000000000000000000010100101;  // -16.5
     d1.bits[1] = 0b00000000000000000000000000000000;
     d1.bits[2] = 0b00000000000000000000000000000000;
     d1.bits[3] = 0b10000000000000010000000000000000;
-    int res = s21_round(d1, NULL);
+    int res = my_round(d1, NULL);
 
     ck_assert_int_eq(res, CALCULATION_ERROR);
 
 
-#test s21_round_simple
+#test my_round_simple
     int res = 0;
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+    my_decimal d = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
 
     // -2.4 => -2
-    s21_from_float_to_decimal(-2.4, &d);
-    s21_from_float_to_decimal(-2.0, &etalon);
-    res = s21_round(d, &result);
+    from_float_to_decimal(-2.4, &d);
+    from_float_to_decimal(-2.0, &etalon);
+    res = my_round(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -505,9 +505,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // -1.6 => -2
-    s21_from_float_to_decimal(-1.6, &d);
-    s21_from_float_to_decimal(-2.0, &etalon);
-    res = s21_round(d, &result);
+    from_float_to_decimal(-1.6, &d);
+    from_float_to_decimal(-2.0, &etalon);
+    res = my_round(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -515,9 +515,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 1.6 => 2
-    s21_from_float_to_decimal(1.6, &d);
-    s21_from_float_to_decimal(2.0, &etalon);
-    res = s21_round(d, &result);
+    from_float_to_decimal(1.6, &d);
+    from_float_to_decimal(2.0, &etalon);
+    res = my_round(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -525,9 +525,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 2.4 => 2
-    s21_from_float_to_decimal(2.4, &d);
-    s21_from_float_to_decimal(2.0, &etalon);
-    res = s21_round(d, &result);
+    from_float_to_decimal(2.4, &d);
+    from_float_to_decimal(2.0, &etalon);
+    res = my_round(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -536,40 +536,40 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
 
 
 
-#test s21_round_extreme
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_round_extreme
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_round(max, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal(max, result), TRUE);
-    ck_assert_int_eq(s21_round(min, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal(min, result), TRUE);
-    ck_assert_int_eq(s21_round(small, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){8}, result), TRUE);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_round(one, NULL), CALCULATION_ERROR);
-    ck_assert_int_eq(s21_round((s21_decimal){0}, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){0}, result), TRUE);
+    ck_assert_int_eq(my_round(max, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal(max, result), TRUE);
+    ck_assert_int_eq(my_round(min, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal(min, result), TRUE);
+    ck_assert_int_eq(my_round(small, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){8}, result), TRUE);
+    // my_print_decimal_bits(small);
+    // my_print_decimal_bits(result);
+    ck_assert_int_eq(my_round(one, NULL), CALCULATION_ERROR);
+    ck_assert_int_eq(my_round((my_decimal){0}, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){0}, result), TRUE);
 
-#test s21_negate_null
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_negate(d, &result);
+#test my_negate_null
+    my_decimal d = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = my_negate(d, &result);
     etalon.bits[3] = 0b10000000000000000000000000000000;
     ck_assert_int_eq(res, CALCULATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
@@ -581,7 +581,7 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     result.bits[1] = 0b10001000101010101010101010101010;
     result.bits[2] = 0b10101010100010001010101010101010;
     result.bits[3] = 0b10101010101010101010001110101010;
-    res = s21_negate(d, &result);
+    res = my_negate(d, &result);
     etalon.bits[3] = 0b10000000000000000000000000000000;
     ck_assert_int_eq(res, CALCULATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
@@ -589,7 +589,7 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-    res = s21_negate(result, &result);
+    res = my_negate(result, &result);
     etalon.bits[3] = 0;
     ck_assert_int_eq(res, CALCULATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
@@ -598,20 +598,20 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_negate_nok
-    s21_decimal d = {0};
-    int res = s21_negate(d, NULL);
+#test my_negate_nok
+    my_decimal d = {0};
+    int res = my_negate(d, NULL);
     ck_assert_int_eq(res, CALCULATION_ERROR);
 
 
-#test s21_negate_one
-    s21_decimal d = {0};
-    s21_decimal result = {0};
+#test my_negate_one
+    my_decimal d = {0};
+    my_decimal result = {0};
     // -1
     d.bits[0] = 0b00000000000000000000000000000001;
     d.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal etalon = {0};
-    int res = s21_negate(d, &result);
+    my_decimal etalon = {0};
+    int res = my_negate(d, &result);
     // 1
     etalon.bits[0] = 0b00000000000000000000000000000001;
     etalon.bits[3] = 0;
@@ -621,10 +621,10 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-    res = s21_negate(result, &result);
+    res = my_negate(result, &result);
     // -1
     // etalon.bits[3] = 0b10000000000000000000000000000000;
-    S21_SET_MINUS(&etalon);
+    SET_MINUS(&etalon);
     ck_assert_int_eq(res, CALCULATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -632,11 +632,11 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_negate_intmax
-    s21_decimal d = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
-    s21_decimal etalon = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(INT_MAX)}};
-    s21_decimal result = {0};
-    int res = s21_negate(d, &result);
+#test my_negate_intmax
+    my_decimal d = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+    my_decimal etalon = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(INT_MAX)}};
+    my_decimal result = {0};
+    int res = my_negate(d, &result);
 
     ck_assert_int_eq(res, CALCULATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
@@ -644,61 +644,61 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_mul_test
-    s21_decimal d1 = {{100, 0, 0, 0}};
-    s21_set_exp(&d1, 1);
-    s21_decimal d2 ={{10, 0, 0, 0}};
-    s21_decimal etalon ={{100, 0, 0, 0}};
-    ck_assert_int_eq(s21_mul(d1, d2, &d1), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(etalon, d1), TRUE);
+#test my_mul_test
+    my_decimal d1 = {{100, 0, 0, 0}};
+    set_exp(&d1, 1);
+    my_decimal d2 ={{10, 0, 0, 0}};
+    my_decimal etalon ={{100, 0, 0, 0}};
+    ck_assert_int_eq(my_mul(d1, d2, &d1), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(etalon, d1), TRUE);
 
 
-#test s21_mul_simple
-    s21_decimal d1 = {3, 0, 0, 0};
-    s21_decimal d2 = {9, 0, 0, 0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {27, 0, 0, 0};
+#test my_mul_simple
+    my_decimal d1 = {3, 0, 0, 0};
+    my_decimal d2 = {9, 0, 0, 0};
+    my_decimal result = {0};
+    my_decimal etalon = {27, 0, 0, 0};
     int res = 0;
 
-    res = s21_mul(d1, d2, &result);
+    res = my_mul(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    ck_assert_int_eq(TRUE, s21_is_equal(etalon, result));
+    ck_assert_int_eq(TRUE, my_is_equal(etalon, result));
 
-    s21_from_int_to_decimal(-3, &d1);
-    s21_from_int_to_decimal(-27, &etalon);
-    res = s21_mul(d1, d2, &result);
+    from_int_to_decimal(-3, &d1);
+    from_int_to_decimal(-27, &etalon);
+    res = my_mul(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    ck_assert_int_eq(TRUE, s21_is_equal(etalon, result));
+    ck_assert_int_eq(TRUE, my_is_equal(etalon, result));
 
-    res = s21_mul(d2, d1, &result);
+    res = my_mul(d2, d1, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    ck_assert_int_eq(TRUE, s21_is_equal(etalon, result));
+    ck_assert_int_eq(TRUE, my_is_equal(etalon, result));
 
-    s21_from_int_to_decimal(-9, &d2);
-    s21_from_int_to_decimal(27, &etalon);
-    res = s21_mul(d2, d1, &result);
+    from_int_to_decimal(-9, &d2);
+    from_int_to_decimal(27, &etalon);
+    res = my_mul(d2, d1, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
-    ck_assert_int_eq(TRUE, s21_is_equal(etalon, result));
+    ck_assert_int_eq(TRUE, my_is_equal(etalon, result));
 
 
-#test s21_mul_null
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon ={0};
+#test my_mul_null
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    my_decimal result = {0};
+    my_decimal etalon ={0};
 
-    ck_assert_int_eq(s21_mul(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(etalon, d1), TRUE);
+    ck_assert_int_eq(my_mul(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(etalon, d1), TRUE);
 
-    ck_assert_int_eq(s21_mul(d1, d2, NULL), NULL_POINTER);
+    ck_assert_int_eq(my_mul(d1, d2, NULL), NULL_POINTER);
 
-#test s21_mod_one
-    s21_decimal d1 = {0b00000000000000000000000000000001, 0, 0, 0};
-    s21_decimal d2 = {0b00000000000000000000000000000010, 0, 0, 0};
-    s21_decimal res = {0};
-    s21_decimal etalon = {0};
+#test my_mod_one
+    my_decimal d1 = {0b00000000000000000000000000000001, 0, 0, 0};
+    my_decimal d2 = {0b00000000000000000000000000000010, 0, 0, 0};
+    my_decimal res = {0};
+    my_decimal etalon = {0};
 
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(d1, d2, &res));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(d1, d2, &res));
     etalon.bits[0] = 0b00000000000000000000000000000001;
     ck_assert_int_eq(res.bits[0], etalon.bits[0]);
     ck_assert_int_eq(res.bits[1], etalon.bits[1]);
@@ -706,118 +706,118 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(res.bits[3], etalon.bits[3]);
 
     d1.bits[0] = 0b00000000000000000000000000000011;
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(d1, d2, &res));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(d1, d2, &res));
     etalon.bits[0] = 0b00000000000000000000000000000001;
     ck_assert_int_eq(res.bits[0], etalon.bits[0]);
     ck_assert_int_eq(res.bits[1], etalon.bits[1]);
     ck_assert_int_eq(res.bits[2], etalon.bits[2]);
     ck_assert_int_eq(res.bits[3], etalon.bits[3]);
 
-#test s21_mod_null
-    s21_decimal d1 = {0b00000000000000000000000000000001, 0, 0, 0};
-    s21_decimal d2 = {0};
-    s21_decimal res = {0};
-    ck_assert_int_eq(DIVISION_BY_0, s21_mod(d1, d2, &res));
+#test my_mod_null
+    my_decimal d1 = {0b00000000000000000000000000000001, 0, 0, 0};
+    my_decimal d2 = {0};
+    my_decimal res = {0};
+    ck_assert_int_eq(DIVISION_BY_0, my_mod(d1, d2, &res));
 
     d1.bits[0] = 0;
-    ck_assert_int_eq(DIVISION_BY_0, s21_mod(d1, d2, &res));
+    ck_assert_int_eq(DIVISION_BY_0, my_mod(d1, d2, &res));
 
     d1.bits[0] = 1;
     d2.bits[0] = 1;
-    ck_assert_int_eq(NULL_POINTER, s21_mod(d1, d2, NULL));
+    ck_assert_int_eq(NULL_POINTER, my_mod(d1, d2, NULL));
 
 
-#test s21_mod_extreme
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_mod_extreme
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_mod(max, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(max, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(max, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(max, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one_neg, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(max, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(min, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(min, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(min, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(min, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one_neg, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(small, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(small, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one, small, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_mod(one_neg, small, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(max, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(max, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(max, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(max, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one_neg, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(max, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(min, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(min, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(min, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(min, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one_neg, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(small, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(small, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one, small, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_mod(one_neg, small, &result), ARITHMETIC_OK);
 
 
-#test s21_mod_simple
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+#test my_mod_simple
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
 
-    s21_from_int_to_decimal(10, &d1);
-    s21_from_int_to_decimal(2, &d2);
-    s21_from_int_to_decimal(0, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(10, &d1);
+    from_int_to_decimal(2, &d2);
+    from_int_to_decimal(0, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
     float f1 = 0;
     float f2 = 0;
     char buff1[100] = {0};
     char buff2[100] = {0};
-    s21_from_float_to_decimal(261.702, &d1);
-    s21_from_float_to_decimal(42.21, &d2);
-    s21_from_float_to_decimal(8.442, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &f1);
-    s21_from_decimal_to_float(etalon, &f2);
+    from_float_to_decimal(261.702, &d1);
+    from_float_to_decimal(42.21, &d2);
+    from_float_to_decimal(8.442, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    from_decimal_to_float(result, &f1);
+    from_decimal_to_float(etalon, &f2);
     sprintf(&buff1[0], "%.2f", f1);
     sprintf(&buff2[0], "%.2f", f2);
     ck_assert_str_eq(buff1, buff2);
 
-    s21_from_int_to_decimal(10, &d1);
-    s21_from_int_to_decimal(4, &d2);
-    s21_from_int_to_decimal(2, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(10, &d1);
+    from_int_to_decimal(4, &d2);
+    from_int_to_decimal(2, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(-10, &d1);
-    s21_from_int_to_decimal(4, &d2);
-    s21_from_int_to_decimal(2, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(-10, &d1);
+    from_int_to_decimal(4, &d2);
+    from_int_to_decimal(2, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(-10, &d1);
-    s21_from_int_to_decimal(-4, &d2);
-    s21_from_int_to_decimal(-2, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(-10, &d1);
+    from_int_to_decimal(-4, &d2);
+    from_int_to_decimal(-2, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(10, &d1);
-    s21_from_int_to_decimal(-4, &d2);
-    s21_from_int_to_decimal(-2, &etalon);
-    ck_assert_int_eq(s21_mod(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(10, &d1);
+    from_int_to_decimal(-4, &d2);
+    from_int_to_decimal(-2, &etalon);
+    ck_assert_int_eq(my_mod(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-#test s21_from_float_to_decimal_null
+#test from_float_to_decimal_null
     float f = 0.0;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_float_to_decimal(f, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_float_to_decimal(f, &result);
     etalon.bits[0] = 0;
     etalon.bits[1] = 0;
     etalon.bits[2] = 0;
@@ -829,22 +829,22 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_from_float_to_decimal_nok
+#test from_float_to_decimal_nok
     float f = 0.0;
-    int res = s21_from_float_to_decimal(f, NULL);
+    int res = from_float_to_decimal(f, NULL);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
 
 
-#test s21_from_float_to_decimal_p_0_02
+#test from_float_to_decimal_p_0_02
     float f = 0.02;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_float_to_decimal(f, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_float_to_decimal(f, &result);
     etalon.bits[0] = 2;
     etalon.bits[1] = 0;
     etalon.bits[2] = 0;
     etalon.bits[3] = 0;
-    s21_set_exp(&etalon, 2);
+    set_exp(&etalon, 2);
     ck_assert_int_eq(res, CONVERTATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -852,11 +852,11 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_from_float_to_decimal_n_one
+#test from_float_to_decimal_n_one
     float f = -1;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_float_to_decimal(f, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_float_to_decimal(f, &result);
     etalon.bits[0] = 0b00000000000000000000000000000001;
     etalon.bits[1] = 0b00000000000000000000000000000000;
     etalon.bits[2] = 0b00000000000000000000000000000000;
@@ -868,90 +868,90 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_from_float_to_decimal_extreme
+#test from_float_to_decimal_extreme
     float f = FLT_MAX;  // 3.402823466e+38F
-    s21_decimal result = {0};
-    // s21_decimal etalon = {0};
-    int res = s21_from_float_to_decimal(f, &result);
-    // s21_print_decimal_bits(result);
+    my_decimal result = {0};
+    // my_decimal etalon = {0};
+    int res = from_float_to_decimal(f, &result);
+    // print_decimal_bits(result);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
 
     f = FLT_MIN;  // 1.175494351e-38F
-    res = s21_from_float_to_decimal(f, &result);
-    // s21_print_decimal_bits(result);
+    res = from_float_to_decimal(f, &result);
+    // print_decimal_bits(result);
     ck_assert_int_eq(res, CONVERTATION_OK);
 
-#test s21_from_decimal_to_int_null
+#test from_decimal_to_int_null
     int i = -1;
-    s21_decimal d = {0};
-    int res = s21_from_decimal_to_int(d, &i);
+    my_decimal d = {0};
+    int res = from_decimal_to_int(d, &i);
     ck_assert_int_eq(res, CONVERTATION_OK);
     ck_assert_int_eq(i, 0);
 
 
-#test s21_from_decimal_to_int_nok
-    s21_decimal d = {0};
-    int res = s21_from_decimal_to_int(d, NULL);
+#test from_decimal_to_int_nok
+    my_decimal d = {0};
+    int res = from_decimal_to_int(d, NULL);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
 
 
-#test s21_from_decimal_to_int_max
+#test from_decimal_to_int_max
     int i = -1;
-    s21_decimal d = {0};
+    my_decimal d = {0};
     d.bits[0] = INT_MAX;
-    int res = s21_from_decimal_to_int(d, &i);
+    int res = from_decimal_to_int(d, &i);
     ck_assert_float_eq(i, 2147483647);
     ck_assert_int_eq(res, CONVERTATION_OK);
 
     d.bits[3] = 0b10000000000000000000000000000000;
-    res = s21_from_decimal_to_int(d, &i);
+    res = from_decimal_to_int(d, &i);
     ck_assert_float_eq(i, -2147483647);
     ck_assert_int_eq(res, CONVERTATION_OK);
 
     d.bits[0] = INT_MAX;
     d.bits[1] = INT_MAX;
     d.bits[2] = INT_MAX;
-    res = s21_from_decimal_to_int(d, &i);
+    res = from_decimal_to_int(d, &i);
     ck_assert_int_eq(res, CONVERTATION_OK);
 
-#test s21_from_decimal_to_float_null
+#test from_decimal_to_float_null
     float f = -1;
-    s21_decimal d = {0};
-    int res = s21_from_decimal_to_float(d, &f);
+    my_decimal d = {0};
+    int res = from_decimal_to_float(d, &f);
     ck_assert_int_eq(res, CONVERTATION_OK);
     ck_assert_float_eq(f, 0);
 
 
-#test s21_from_decimal_to_float_nok
-    s21_decimal d = {0};
-    int res = s21_from_decimal_to_float(d, NULL);
+#test from_decimal_to_float_nok
+    my_decimal d = {0};
+    int res = from_decimal_to_float(d, NULL);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
 
 
-#test s21_from_decimal_to_float_ff
-    s21_decimal d;
+#test from_decimal_to_float_ff
+    my_decimal d;
     float number = -1;
     d.bits[0] = -1;
     d.bits[1] = -1;
     d.bits[2] = 0;
     d.bits[3] = 0;
-    int res = s21_from_decimal_to_float(d, &number);
+    int res = from_decimal_to_float(d, &number);
     ck_assert_float_eq(number, 0xFFFFFFFFFFFFFFFF);
     ck_assert_int_eq(res, CALCULATION_OK);
 
     d.bits[3] = 0b10000000000000000000000000000000;
-    res = s21_from_decimal_to_float(d, &number);
+    res = from_decimal_to_float(d, &number);
     ck_assert_int_eq(res, CALCULATION_OK);
 
     d.bits[3] = 0b11111111111111111111111111111111;
-    res = s21_from_decimal_to_float(d, &number);
+    res = from_decimal_to_float(d, &number);
     ck_assert_int_eq(res, CALCULATION_ERROR);
 
-#test s21_floor_null
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_floor(d, &result);
+#test my_floor_null
+    my_decimal d = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = my_floor(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
     ck_assert_int_eq(etalon.bits[1], result.bits[1]);
@@ -959,22 +959,22 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
 
 
-#test s21_floor_nok
-    s21_decimal d = {0};
-    int res = s21_floor(d, NULL);
+#test my_floor_nok
+    my_decimal d = {0};
+    int res = my_floor(d, NULL);
     ck_assert_int_eq(CALCULATION_ERROR, res);
 
 
-#test s21_floor_simple
+#test my_floor_simple
     int res = 0;
-    s21_decimal d = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+    my_decimal d = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
 
     // -2.4 => -3
-    s21_from_float_to_decimal(-2.4, &d);
-    s21_from_float_to_decimal(-3.0, &etalon);
-    res = s21_floor(d, &result);
+    from_float_to_decimal(-2.4, &d);
+    from_float_to_decimal(-3.0, &etalon);
+    res = my_floor(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -982,9 +982,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // -1.6 => -2
-    s21_from_float_to_decimal(-1.6, &d);
-    s21_from_float_to_decimal(-2.0, &etalon);
-    res = s21_floor(d, &result);
+    from_float_to_decimal(-1.6, &d);
+    from_float_to_decimal(-2.0, &etalon);
+    res = my_floor(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -992,9 +992,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 1.6 => 1
-    s21_from_float_to_decimal(1.6, &d);
-    s21_from_float_to_decimal(1.0, &etalon);
-    res = s21_floor(d, &result);
+    from_float_to_decimal(1.6, &d);
+    from_float_to_decimal(1.0, &etalon);
+    res = my_floor(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -1002,9 +1002,9 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
     // 2.4 => 2
-    s21_from_float_to_decimal(2.4, &d);
-    s21_from_float_to_decimal(2.0, &etalon);
-    res = s21_floor(d, &result);
+    from_float_to_decimal(2.4, &d);
+    from_float_to_decimal(2.0, &etalon);
+    res = my_floor(d, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
@@ -1012,146 +1012,146 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
 
-#test s21_floor_extreme
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_floor_extreme
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_floor(max, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal(max, result), TRUE);
-    ck_assert_int_eq(s21_floor(min, &result), CALCULATION_OK);
-    // s21_print_decimal_bits(min);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_is_equal(min, result), TRUE);
-    ck_assert_int_eq(s21_floor(small, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){7}, result), TRUE);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_floor(one, NULL), CALCULATION_ERROR);
-    ck_assert_int_eq(s21_floor((s21_decimal){0}, &result), CALCULATION_OK);
-    ck_assert_int_eq(s21_is_equal((s21_decimal){0}, result), TRUE);
+    ck_assert_int_eq(my_floor(max, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal(max, result), TRUE);
+    ck_assert_int_eq(my_floor(min, &result), CALCULATION_OK);
+    // my_print_decimal_bits(min);
+    // my_print_decimal_bits(result);
+    ck_assert_int_eq(my_is_equal(min, result), TRUE);
+    ck_assert_int_eq(my_floor(small, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){7}, result), TRUE);
+    // my_print_decimal_bits(small);
+    // my_print_decimal_bits(result);
+    ck_assert_int_eq(my_floor(one, NULL), CALCULATION_ERROR);
+    ck_assert_int_eq(my_floor((my_decimal){0}, &result), CALCULATION_OK);
+    ck_assert_int_eq(my_is_equal((my_decimal){0}, result), TRUE);
 
-#test s21_div_test
-    s21_decimal d1;
-    s21_decimal d2;
+#test my_div_test
+    my_decimal d1;
+    my_decimal d2;
     int i1 = -100;
     int i2 = -99999;
     float result = 0;
     float etalon = 0.00100001;
-    s21_from_int_to_decimal(i1, &d1);
-    s21_from_int_to_decimal(i2, &d2);
-    s21_decimal res;
-    s21_div(d1, d2, &res);
-    s21_from_decimal_to_float(res, &result);
+    from_int_to_decimal(i1, &d1);
+    from_int_to_decimal(i2, &d2);
+    my_decimal res;
+    my_div(d1, d2, &res);
+    from_decimal_to_float(res, &result);
     ck_assert_float_eq_tol(result, etalon, 6);
 
 
-#test s21_div_null
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    s21_decimal result = {0};
+#test my_div_null
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    my_decimal result = {0};
     int res = 0;
 
-    ck_assert_int_eq(s21_div(d1, d2, &result), DIVISION_BY_0);
-    ck_assert_int_eq(s21_div(d1, d2, NULL), NULL_POINTER);
+    ck_assert_int_eq(my_div(d1, d2, &result), DIVISION_BY_0);
+    ck_assert_int_eq(my_div(d1, d2, NULL), NULL_POINTER);
 
-    s21_from_int_to_decimal(1234, &d1);
-    res = s21_div(d1, d2, &result);
+    from_int_to_decimal(1234, &d1);
+    res = my_div(d1, d2, &result);
     ck_assert_int_eq(DIVISION_BY_0, res);
 
 
-#test s21_div_simple
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
+#test my_div_simple
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    my_decimal result = {0};
+    my_decimal etalon = {0};
     // int res = 0;
 
-    s21_from_int_to_decimal(42, &d1);
-    s21_from_int_to_decimal(6, &d2);
-    s21_from_int_to_decimal(7, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(42, &d1);
+    from_int_to_decimal(6, &d2);
+    from_int_to_decimal(7, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(-42, &d1);
-    s21_from_int_to_decimal(6, &d2);
-    s21_from_int_to_decimal(-7, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(-42, &d1);
+    from_int_to_decimal(6, &d2);
+    from_int_to_decimal(-7, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(42, &d1);
-    s21_from_int_to_decimal(-6, &d2);
-    s21_from_int_to_decimal(-7, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(42, &d1);
+    from_int_to_decimal(-6, &d2);
+    from_int_to_decimal(-7, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
-    s21_from_int_to_decimal(-42, &d1);
-    s21_from_int_to_decimal(-6, &d2);
-    s21_from_int_to_decimal(7, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
+    from_int_to_decimal(-42, &d1);
+    from_int_to_decimal(-6, &d2);
+    from_int_to_decimal(7, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
 
     float f1 = 0;
     float f2 = 0;
     char buff1[100] = {0};
     char buff2[100] = {0};
-    s21_from_float_to_decimal(261.702, &d1);
-    s21_from_float_to_decimal(42.21, &d2);
-    s21_from_float_to_decimal(6.2, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &f1);
-    s21_from_decimal_to_float(etalon, &f2);
+    from_float_to_decimal(261.702, &d1);
+    from_float_to_decimal(42.21, &d2);
+    from_float_to_decimal(6.2, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    from_decimal_to_float(result, &f1);
+    from_decimal_to_float(etalon, &f2);
     sprintf(&buff1[0], "%.2f", f1);
     sprintf(&buff2[0], "%.2f", f2);
     ck_assert_str_eq(buff1, buff2);
 
-    s21_from_float_to_decimal(-261.702, &d1);
-    s21_from_float_to_decimal(42.21, &d2);
-    s21_from_float_to_decimal(-6.2, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &f1);
-    s21_from_decimal_to_float(etalon, &f2);
+    from_float_to_decimal(-261.702, &d1);
+    from_float_to_decimal(42.21, &d2);
+    from_float_to_decimal(-6.2, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    from_decimal_to_float(result, &f1);
+    from_decimal_to_float(etalon, &f2);
     sprintf(&buff1[0], "%.2f", f1);
     sprintf(&buff2[0], "%.2f", f2);
     ck_assert_str_eq(buff1, buff2);
 
-    s21_from_float_to_decimal(261.702, &d1);
-    s21_from_float_to_decimal(-42.21, &d2);
-    s21_from_float_to_decimal(-6.2, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &f1);
-    s21_from_decimal_to_float(etalon, &f2);
+    from_float_to_decimal(261.702, &d1);
+    from_float_to_decimal(-42.21, &d2);
+    from_float_to_decimal(-6.2, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    from_decimal_to_float(result, &f1);
+    from_decimal_to_float(etalon, &f2);
     sprintf(&buff1[0], "%.2f", f1);
     sprintf(&buff2[0], "%.2f", f2);
     ck_assert_str_eq(buff1, buff2);
 
-    s21_from_float_to_decimal(-261.702, &d1);
-    s21_from_float_to_decimal(-42.21, &d2);
-    s21_from_float_to_decimal(6.2, &etalon);
-    ck_assert_int_eq(s21_div(d1, d2, &result), ARITHMETIC_OK);
-    s21_from_decimal_to_float(result, &f1);
-    s21_from_decimal_to_float(etalon, &f2);
+    from_float_to_decimal(-261.702, &d1);
+    from_float_to_decimal(-42.21, &d2);
+    from_float_to_decimal(6.2, &etalon);
+    ck_assert_int_eq(my_div(d1, d2, &result), ARITHMETIC_OK);
+    from_decimal_to_float(result, &f1);
+    from_decimal_to_float(etalon, &f2);
     sprintf(&buff1[0], "%.2f", f1);
     sprintf(&buff2[0], "%.2f", f2);
     ck_assert_str_eq(buff1, buff2);
 
-#test s21_from_int_to_decimal_null
+#test from_int_to_decimal_null
     int i = 0;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_int_to_decimal(i, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_int_to_decimal(i, &result);
     etalon.bits[0] = 0;
     etalon.bits[1] = 0;
     etalon.bits[2] = 0;
@@ -1162,17 +1162,17 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_from_int_to_decimal_nok
+#test from_int_to_decimal_nok
     int i = 0;
-    int res = s21_from_int_to_decimal(i, NULL);
+    int res = from_int_to_decimal(i, NULL);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
 
 
-#test s21_from_int_to_decimal_n_128
+#test from_int_to_decimal_n_128
     int i = -128;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_int_to_decimal(i, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_int_to_decimal(i, &result);
     etalon.bits[0] = 128;
     etalon.bits[1] = 0;
     etalon.bits[2] = 0;
@@ -1183,11 +1183,11 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_from_int_to_decimal_p_127
+#test from_int_to_decimal_p_127
     int i = 127;
-    s21_decimal result = {0};
-    s21_decimal etalon = {0};
-    int res = s21_from_int_to_decimal(i, &result);
+    my_decimal result = {0};
+    my_decimal etalon = {0};
+    int res = from_int_to_decimal(i, &result);
     etalon.bits[0] = 127;
     etalon.bits[1] = 0;
     etalon.bits[2] = 0;
@@ -1198,22 +1198,22 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_from_int_to_decimal_max
+#test from_int_to_decimal_max
     int max = INT_MAX;
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_from_int_to_decimal(max, &result);
-    s21_decimal etalon = {{INT_MAX, 0, 0, 0}};
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = from_int_to_decimal(max, &result);
+    my_decimal etalon = {{INT_MAX, 0, 0, 0}};
     ck_assert_int_eq(res, CONVERTATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
     ck_assert_int_eq(result.bits[1], etalon.bits[1]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_from_int_to_decimal_min
+#test from_int_to_decimal_min
     int max = INT_MIN;
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_from_int_to_decimal(max, &result);
-    s21_decimal etalon = {{INT_MIN, 0, 0, 0}};
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = from_int_to_decimal(max, &result);
+    my_decimal etalon = {{INT_MIN, 0, 0, 0}};
     etalon.bits[3] = 0b10000000000000000000000000000000;
     ck_assert_int_eq(res, CONVERTATION_OK);
     ck_assert_int_eq(result.bits[0], etalon.bits[0]);
@@ -1221,67 +1221,67 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(result.bits[2], etalon.bits[2]);
     ck_assert_int_eq(result.bits[3], etalon.bits[3]);
 
-#test s21_div_extreme
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_div_extreme
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     // int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    ck_assert_int_eq(s21_div(max, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, one), TRUE);
-    ck_assert_int_eq(s21_div(max, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, max), TRUE);
-    ck_assert_int_eq(s21_div(one, max, &result), TOO_SMALL_OR_NEG_INF);
-    ck_assert_int_eq(s21_div(max, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, min), TRUE);
-    ck_assert_int_eq(s21_div(one_neg, max, &result), TOO_SMALL_OR_NEG_INF);
-    ck_assert_int_eq(s21_div(max, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, one_neg), TRUE);
-    ck_assert_int_eq(s21_div(min, max, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, one_neg), TRUE);
-    ck_assert_int_eq(s21_div(min, min, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, one), TRUE);
-    ck_assert_int_eq(s21_div(min, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, min), TRUE);
-    ck_assert_int_eq(s21_div(one, min, &result), TOO_SMALL_OR_NEG_INF);
-    ck_assert_int_eq(s21_div(min, one_neg, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, max), TRUE);
-    ck_assert_int_eq(s21_div(one_neg, min, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_div(max, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, one), TRUE);
+    ck_assert_int_eq(my_div(max, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, max), TRUE);
+    ck_assert_int_eq(my_div(one, max, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_div(max, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, min), TRUE);
+    ck_assert_int_eq(my_div(one_neg, max, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_div(max, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, one_neg), TRUE);
+    ck_assert_int_eq(my_div(min, max, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, one_neg), TRUE);
+    ck_assert_int_eq(my_div(min, min, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, one), TRUE);
+    ck_assert_int_eq(my_div(min, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, min), TRUE);
+    ck_assert_int_eq(my_div(one, min, &result), TOO_SMALL_OR_NEG_INF);
+    ck_assert_int_eq(my_div(min, one_neg, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, max), TRUE);
+    ck_assert_int_eq(my_div(one_neg, min, &result), TOO_SMALL_OR_NEG_INF);
 
-    ck_assert_int_eq(s21_div(small, one, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_is_equal(result, small), TRUE);
-    ck_assert_int_eq(s21_div(small, one_neg, &result), ARITHMETIC_OK);
-    // s21_div(one, small, &result);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(result);
-    ck_assert_int_eq(s21_div(one, small, &result), ARITHMETIC_OK);
-    ck_assert_int_eq(s21_div(one_neg, small, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_div(small, one, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_is_equal(result, small), TRUE);
+    ck_assert_int_eq(my_div(small, one_neg, &result), ARITHMETIC_OK);
+    // my_div(one, small, &result);
+    // my_print_decimal_bits(small);
+    // my_print_decimal_bits(result);
+    ck_assert_int_eq(my_div(one, small, &result), ARITHMETIC_OK);
+    ck_assert_int_eq(my_div(one_neg, small, &result), ARITHMETIC_OK);
 
-#test s21_add_nok
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    ck_assert_int_eq(NULL_POINTER, s21_add(d1, d2, NULL));
+#test my_add_nok
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    ck_assert_int_eq(NULL_POINTER, my_add(d1, d2, NULL));
 
 
-#test s21_add_simple
-    s21_decimal d1 = {{0b00000000000000000001100101111001, 0, 0, 0}};
-    s21_decimal d2 = {{0b00000000000000010010000110001001, 0, 0, 0}};
-    s21_decimal etalon = {{0b00000000000000010011101100000010, 0, 0, 0}};
+#test my_add_simple
+    my_decimal d1 = {{0b00000000000000000001100101111001, 0, 0, 0}};
+    my_decimal d2 = {{0b00000000000000010010000110001001, 0, 0, 0}};
+    my_decimal etalon = {{0b00000000000000010011101100000010, 0, 0, 0}};
 
-    s21_decimal result = {{0, 0, 0, 0}};
+    my_decimal result = {{0, 0, 0, 0}};
 
-    int res = s21_add(d1, d2, &result);
+    int res = my_add(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1290,15 +1290,15 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_add_simple_2
-    s21_decimal d1 = {{0b10001001111001111111111111111111,
+#test my_add_simple_2
+    my_decimal d1 = {{0b10001001111001111111111111111111,
                       0b10001010110001110010001100000100, 0, 0}};
-    s21_decimal d2 = {{0b00000000000000000000000000000001, 0, 0, 0}};
-    s21_decimal etalon = {{0b10001001111010000000000000000000,
+    my_decimal d2 = {{0b00000000000000000000000000000001, 0, 0, 0}};
+    my_decimal etalon = {{0b10001001111010000000000000000000,
                            0b10001010110001110010001100000100, 0, 0}};
 
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_add(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = my_add(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1307,14 +1307,14 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_add_sign
+#test my_add_sign
 
-    s21_decimal d1 = {{1, 0, 0, 0b10000000000000000000000000000000}};
-    s21_decimal d2 = {{2, 0, 0, 0}};
-    s21_decimal etalon = {{1, 0, 0, 0}};
+    my_decimal d1 = {{1, 0, 0, 0b10000000000000000000000000000000}};
+    my_decimal d2 = {{2, 0, 0, 0}};
+    my_decimal etalon = {{1, 0, 0, 0}};
 
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_add(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = my_add(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1322,7 +1322,7 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[1], result.bits[1]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
-    res = s21_add(d2, d1, &result);
+    res = my_add(d2, d1, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1332,14 +1332,14 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
 
 
 
-#test s21_add_sign_2
+#test my_add_sign_2
 
-    s21_decimal d1 = {{2, 0, 0, 0b10000000000000000000000000000000}};
-    s21_decimal d2 = {{1, 0, 0, 0}};
-    s21_decimal etalon = {{1, 0, 0, 0b10000000000000000000000000000000}};
+    my_decimal d1 = {{2, 0, 0, 0b10000000000000000000000000000000}};
+    my_decimal d2 = {{1, 0, 0, 0}};
+    my_decimal etalon = {{1, 0, 0, 0b10000000000000000000000000000000}};
 
-    s21_decimal result = {{0, 0, 0, 0}};
-    int res = s21_add(d1, d2, &result);
+    my_decimal result = {{0, 0, 0, 0}};
+    int res = my_add(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1351,7 +1351,7 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[3] = 0;
     etalon.bits[0] = 3;
     etalon.bits[3] = 0;
-    res = s21_add(d1, d2, &result);
+    res = my_add(d1, d2, &result);
     ck_assert_int_eq(res, ARITHMETIC_OK);
 
     ck_assert_int_eq(etalon.bits[3], result.bits[3]);
@@ -1360,266 +1360,266 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     ck_assert_int_eq(etalon.bits[0], result.bits[0]);
 
 
-#test s21_add_error
-    s21_decimal max = {0};
+#test my_add_error
+    my_decimal max = {0};
     // max.bits[0] = 0b11111111111111111111111111111111;
     // max.bits[1] = 0b11111111111111111111111111111111;
     // max.bits[2] = 0b11111111111111111111111111111111;
     // max.bits[3] = 0b00000000011111111000000000000000;
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
     // min.bits[0] = 0b11111111111111111111111111111111;
     // min.bits[1] = 0b11111111111111111111111111111111;
     // min.bits[2] = 0b11111111111111111111111111111111;
     // min.bits[3] = 0b00000000011111111000000000000000;
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
+    SET_MINUS(&one_neg);
     int res = -5;
-    s21_decimal result = {1, 2, 3, 4};
+    my_decimal result = {1, 2, 3, 4};
 
-    res = s21_add(max, max, &result);
+    res = my_add(max, max, &result);
     ck_assert_int_eq(TOO_LARGE_OR_INF, res);
 
-    res = s21_add(max, one, &result);
+    res = my_add(max, one, &result);
     ck_assert_int_eq(TOO_LARGE_OR_INF, res);
 
-    res = s21_add(one, max, &result);
+    res = my_add(one, max, &result);
     ck_assert_int_eq(TOO_LARGE_OR_INF, res);
 
-    res = s21_add(max, one_neg, &result);
+    res = my_add(max, one_neg, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
 
-    res = s21_add(one_neg, max, &result);
+    res = my_add(one_neg, max, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
 
-    res = s21_add(max, min, &result);
+    res = my_add(max, min, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
-    s21_from_decimal_to_int(result, &res);
+    from_decimal_to_int(result, &res);
     ck_assert_int_eq(0, res);
 
-    res = s21_add(min, max, &result);
+    res = my_add(min, max, &result);
     ck_assert_int_eq(CALCULATION_OK, res);
-    s21_from_decimal_to_int(result, &res);
+    from_decimal_to_int(result, &res);
     ck_assert_int_eq(0, res);
 
-    res = s21_add(min, min, &result);
+    res = my_add(min, min, &result);
     ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, res);
 
-    res = s21_add(min, one, &result);
+    res = my_add(min, one, &result);
     ck_assert_int_eq(ARITHMETIC_OK, res);
 
-    res = s21_add(min, one_neg, &result);
+    res = my_add(min, one_neg, &result);
     ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, res);
 
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
-    res = s21_add(one, small, &result);
-    // s21_print_decimal_bits(small);
-    // s21_print_decimal_bits(one);
-    // s21_print_decimal_bits(result);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
+    res = my_add(one, small, &result);
+    // my_print_decimal_bits(small);
+    // my_print_decimal_bits(one);
+    // my_print_decimal_bits(result);
     // ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, res);
 
-    res = s21_add(one_neg, small, &result);
+    res = my_add(one_neg, small, &result);
     ck_assert_int_eq(ARITHMETIC_OK, res);
 
 
 
-#test s21_add_zero
-    s21_decimal d1 = {2, 0, 0, 0};
-    s21_decimal d2 = {2, 0, 0, 0};
-    S21_SET_MINUS(&d2);
-    s21_decimal result = {0};
+#test my_add_zero
+    my_decimal d1 = {2, 0, 0, 0};
+    my_decimal d2 = {2, 0, 0, 0};
+    SET_MINUS(&d2);
+    my_decimal result = {0};
     int res = 0;
 
-    ck_assert_int_eq(ARITHMETIC_OK, s21_add(d1, d2, &result));
-    s21_from_decimal_to_int(result, &res);
+    ck_assert_int_eq(ARITHMETIC_OK, my_add(d1, d2, &result));
+    from_decimal_to_int(result, &res);
     ck_assert_int_eq(0, res);
 
-    s21_value_reset(&d1);
-    s21_value_reset(&d2);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_add(d1, d2, &result));
-    s21_from_decimal_to_int(result, &res);
+    value_reset(&d1);
+    value_reset(&d2);
+    ck_assert_int_eq(ARITHMETIC_OK, my_add(d1, d2, &result));
+    from_decimal_to_int(result, &res);
     ck_assert_int_eq(0, res);
 
-#test s21_micro
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
-    s21_from_int_to_decimal(1, &one);
-    s21_decimal one_neg = {0};
-    s21_from_int_to_decimal(1, &one_neg);
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
-    s21_decimal micro = {0};
-    s21_from_int_to_decimal(1, &micro);
-    s21_set_exp(&micro, S21_MAX_EXP);
-    s21_decimal zero = {0};
-    s21_decimal result = {1, 2, 3, 4};
-    s21_decimal etalon = {0};
+#test my_micro
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
+    from_int_to_decimal(1, &one);
+    my_decimal one_neg = {0};
+    from_int_to_decimal(1, &one_neg);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
+    my_decimal micro = {0};
+    from_int_to_decimal(1, &micro);
+    set_exp(&micro, MAX_EXP);
+    my_decimal zero = {0};
+    my_decimal result = {1, 2, 3, 4};
+    my_decimal etalon = {0};
 
     // micro & micro ;
-    ck_assert_int_eq(ARITHMETIC_OK, s21_add(micro, micro, &result));
-    s21_from_int_to_decimal(2, &etalon);
-    s21_set_exp(&etalon, S21_MAX_EXP);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(micro, micro, &result));
-    s21_from_int_to_decimal(0, &etalon);
-    s21_set_exp(&etalon, 0);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
-    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, s21_mul(micro, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(micro, micro, &result));
-    s21_from_int_to_decimal(1, &etalon);
-    s21_set_exp(&etalon, 0);
-    ck_assert_int_eq(s21_is_equal(result, etalon), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(micro, micro, &result));
-    ck_assert_int_eq(s21_is_equal(result, zero), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_add(micro, micro, &result));
+    from_int_to_decimal(2, &etalon);
+    set_exp(&etalon, my_MAX_EXP);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(micro, micro, &result));
+    from_int_to_decimal(0, &etalon);
+    set_exp(&etalon, 0);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
+    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, my_mul(micro, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(micro, micro, &result));
+    from_int_to_decimal(1, &etalon);
+    set_exp(&etalon, 0);
+    ck_assert_int_eq(my_is_equal(result, etalon), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(micro, micro, &result));
+    ck_assert_int_eq(my_is_equal(result, zero), TRUE);
 
     // micro & max ; max & micro
-    ck_assert_int_eq(TOO_LARGE_OR_INF, s21_add(micro, max, &result));
-    ck_assert_int_eq(TOO_LARGE_OR_INF, s21_add(max, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(micro, max, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(max, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(micro, max, &result));
-    ck_assert_int_eq(s21_is_equal(result, small), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(max, micro, &result));
-    ck_assert_int_eq(s21_is_equal(result, small), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(micro, max, &result));
-    ck_assert_int_eq(s21_is_equal(result, zero), TRUE);
-    ck_assert_int_eq(TOO_LARGE_OR_INF, s21_div(max, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(micro, max, &result));
-    ck_assert_int_eq(s21_is_equal(result, micro), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(max, micro, &result));
-    ck_assert_int_eq(s21_is_equal(result, zero), TRUE);
+    ck_assert_int_eq(TOO_LARGE_OR_INF, my_add(micro, max, &result));
+    ck_assert_int_eq(TOO_LARGE_OR_INF, my_add(max, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(micro, max, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(max, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(micro, max, &result));
+    ck_assert_int_eq(my_is_equal(result, small), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(max, micro, &result));
+    ck_assert_int_eq(my_is_equal(result, small), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(micro, max, &result));
+    ck_assert_int_eq(my_is_equal(result, zero), TRUE);
+    ck_assert_int_eq(TOO_LARGE_OR_INF, my_div(max, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(micro, max, &result));
+    ck_assert_int_eq(my_is_equal(result, micro), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(max, micro, &result));
+    ck_assert_int_eq(my_is_equal(result, zero), TRUE);
 
     // micro & min ; min & micro
-    ck_assert_int_eq(ARITHMETIC_OK, s21_add(micro, min, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_add(min, micro, &result));
-    ck_assert_int_eq(TOO_LARGE_OR_INF, s21_sub(micro, min, &result));
-    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, s21_sub(min, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(micro, min, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(min, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(micro, min, &result));
-    ck_assert_int_eq(s21_is_equal(result, zero), TRUE);
-    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, s21_div(min, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(micro, min, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(min, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_add(micro, min, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_add(min, micro, &result));
+    ck_assert_int_eq(TOO_LARGE_OR_INF, my_sub(micro, min, &result));
+    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, my_sub(min, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(micro, min, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(min, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(micro, min, &result));
+    ck_assert_int_eq(my_is_equal(result, zero), TRUE);
+    ck_assert_int_eq(TOO_SMALL_OR_NEG_INF, my_div(min, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(micro, min, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(min, micro, &result));
 
     // micro & one ; one & micro
-    ck_assert_int_eq(CALCULATION_OK, s21_add(micro, one, &result));
-    ck_assert_int_eq(CALCULATION_OK, s21_add(one, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(micro, one, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(one, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(micro, one, &result));
-    ck_assert_int_eq(s21_is_equal(result, micro), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(one, micro, &result));
-    ck_assert_int_eq(s21_is_equal(result, micro), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(micro, one, &result));
-    ck_assert_int_eq(s21_is_equal(result, micro), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(one, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(micro, one, &result));
-    ck_assert_int_eq(s21_is_equal(result, micro), TRUE);
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(one, micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_add(micro, one, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_add(one, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(micro, one, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(one, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(micro, one, &result));
+    ck_assert_int_eq(my_is_equal(result, micro), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(one, micro, &result));
+    ck_assert_int_eq(my_is_equal(result, micro), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(micro, one, &result));
+    ck_assert_int_eq(my_is_equal(result, micro), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(one, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(micro, one, &result));
+    ck_assert_int_eq(my_is_equal(result, micro), TRUE);
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(one, micro, &result));
 
     // micro & one_neg ; one_neg & micro
-    ck_assert_int_eq(CALCULATION_OK, s21_add(micro, one_neg, &result));
-    ck_assert_int_eq(CALCULATION_OK, s21_add(one_neg, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(micro, one_neg, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_sub(one_neg, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(micro, one_neg, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mul(one_neg, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(micro, one_neg, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_div(one_neg, micro, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(micro, one_neg, &result));
-    ck_assert_int_eq(ARITHMETIC_OK, s21_mod(one_neg, micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_add(micro, one_neg, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_add(one_neg, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(micro, one_neg, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_sub(one_neg, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(micro, one_neg, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mul(one_neg, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(micro, one_neg, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_div(one_neg, micro, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(micro, one_neg, &result));
+    ck_assert_int_eq(ARITHMETIC_OK, my_mod(one_neg, micro, &result));
     // micro
-    ck_assert_int_eq(CALCULATION_OK, s21_floor(micro, &result));
-    ck_assert_int_eq(CALCULATION_OK, s21_round(micro, &result));
-    ck_assert_int_eq(CALCULATION_OK, s21_truncate(micro, &result));
-    ck_assert_int_eq(CALCULATION_OK, s21_negate(micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_floor(micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_round(micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_truncate(micro, &result));
+    ck_assert_int_eq(CALCULATION_OK, my_negate(micro, &result));
 
-#test s21_is_less_true
+#test my_is_less_true
 
-    s21_decimal d1 = {{0,0,0,0}};
-    s21_decimal d2 = {9, 0, 9, 0};
-    int res = s21_is_less(d1, d2);
+    my_decimal d1 = {{0,0,0,0}};
+    my_decimal d2 = {9, 0, 9, 0};
+    int res = my_is_less(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_less_false
+#test my_is_less_false
 
-    s21_decimal d1 = {{0,0,0,0}};
-    s21_decimal d2 = {9, 0, 9, 0};
-    int res = s21_is_less(d2, d1);
+    my_decimal d1 = {{0,0,0,0}};
+    my_decimal d2 = {9, 0, 9, 0};
+    int res = my_is_less(d2, d1);
     ck_assert_int_eq(res, FALSE);
 
-    s21_decimal d3 = {1,1,1,0};
-    s21_decimal d4 = {1,1,1,0};
-    res = s21_is_less(d3, d4);
+    my_decimal d3 = {1,1,1,0};
+    my_decimal d4 = {1,1,1,0};
+    res = my_is_less(d3, d4);
     ck_assert_int_eq(res, FALSE);
 
 
-#test s21_is_less_sign
+#test my_is_less_sign
 
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
     d1.bits[0] = 0b00000000000000000000000000000001;  // 1
     d2.bits[0] = 0b00000000000000000000000000000011;  // -3
     d2.bits[3] = 0b10000000000000000000000000000000;
-    int res = s21_is_less(d1, d2);  // 1 and -3
+    int res = my_is_less(d1, d2);  // 1 and -3
     ck_assert_int_eq(res, FALSE);
-    res = s21_is_less(d2, d1);  // -3 and 1
+    res = my_is_less(d2, d1);  // -3 and 1
     ck_assert_int_eq(res, TRUE);
 
     d1.bits[3] = 0b10000000000000000000000000000000;  // -1
-    res = s21_is_less(d1, d2);  // -1 and -3
+    res = my_is_less(d1, d2);  // -1 and -3
     ck_assert_int_eq(res, FALSE);
-    res = s21_is_less(d2, d1);  // -3 and -1
+    res = my_is_less(d2, d1);  // -3 and -1
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_less_or_equal_null
+#test my_is_less_or_equal_null
 
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    int res = s21_is_less_or_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    int res = my_is_less_or_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_less_or_equal_equal
+#test my_is_less_or_equal_equal
 
-    s21_decimal d1 = {0, 0, 1, 0};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_less_or_equal(d1, d2);
+    my_decimal d1 = {0, 0, 1, 0};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_less_or_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_less_or_equal_true
+#test my_is_less_or_equal_true
 
-    s21_decimal d1 = {0, 0, 1, 0};
-    s21_decimal d2 = {0, 0, 2, 0};
-    int res = s21_is_less_or_equal(d1, d2);
+    my_decimal d1 = {0, 0, 1, 0};
+    my_decimal d2 = {0, 0, 2, 0};
+    int res = my_is_less_or_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_greater_null
-    s21_decimal d1 = {0};
-    s21_decimal d2 = {0};
-    ck_assert_int_eq((s21_is_greater(d1, d2)), FALSE);
+#test my_is_greater_null
+    my_decimal d1 = {0};
+    my_decimal d2 = {0};
+    ck_assert_int_eq((my_is_greater(d1, d2)), FALSE);
 
 
-#test s21_is_greater_true
-    s21_decimal d1, d2;
+#test my_is_greater_true
+    my_decimal d1, d2;
 
     d1.bits[0] = 0b00000000000000000000000000000000;
     d1.bits[1] = 0b11111111111111111111111111111111;
@@ -1632,11 +1632,11 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b10000000000000000000000000000000;
 
-    ck_assert_int_eq((s21_is_greater(d1, d2)), TRUE);
+    ck_assert_int_eq((my_is_greater(d1, d2)), TRUE);
 
 
-#test s21_is_greater_false
-    s21_decimal d1, d2;
+#test my_is_greater_false
+    my_decimal d1, d2;
 
     // d1 = -2;
     d1.bits[0] = 0b00000000000000000000000000000010;
@@ -1650,11 +1650,11 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b10000000000000000000000000000000;
 
-    ck_assert_int_eq((s21_is_greater(d1, d2)), FALSE);
+    ck_assert_int_eq((my_is_greater(d1, d2)), FALSE);
 
 
-#test s21_is_greater_max
-    s21_decimal d1, d2;
+#test my_is_greater_max
+    my_decimal d1, d2;
 
     // d1 = 79228162514264337593543950335;
     d1.bits[0] = 0b11111111111111111111111111111111;
@@ -1668,203 +1668,203 @@ ck_assert_int_eq(d3.bits[3], result.bits[3]);
     d2.bits[2] = 0b00000000000000000000000000000000;
     d2.bits[3] = 0b10000000000000000000000000000000;
 
-    ck_assert_int_eq((s21_is_greater(d1, d2)), TRUE);
+    ck_assert_int_eq((my_is_greater(d1, d2)), TRUE);
 
 
-#test s21_is_greater_or_equal_null
+#test my_is_greater_or_equal_null
 
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    int res = s21_is_greater_or_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    int res = my_is_greater_or_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_greater_or_equal_true
+#test my_is_greater_or_equal_true
 
-    s21_decimal d1 = {0, 0, 1, 0};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_greater_or_equal(d1, d2);
+    my_decimal d1 = {0, 0, 1, 0};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_greater_or_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_greater_or_equal_false
+#test my_is_greater_or_equal_false
 
-    s21_decimal d1 = {1, 0, 0, 0};
-    s21_decimal d2 = {2, 0, 0, 0};
-    int res = s21_is_greater_or_equal(d1, d2);
+    my_decimal d1 = {1, 0, 0, 0};
+    my_decimal d2 = {2, 0, 0, 0};
+    int res = my_is_greater_or_equal(d1, d2);
     ck_assert_int_eq(res, FALSE);
 
 
-#test s21_is_equal_null
+#test my_is_equal_null
 
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    int res = s21_is_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    int res = my_is_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_equal_true
+#test my_is_equal_true
 
-    s21_decimal d1 = {0, 0, 1, 0};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_equal(d1, d2);
+    my_decimal d1 = {0, 0, 1, 0};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_is_equal_false
+#test my_is_equal_false
 
-    s21_decimal d1 = {0, 0, 0, 1};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 1};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_equal(d1, d2);
     ck_assert_int_eq(res, FALSE);
 
 
-#test s21_is_equal_nok
-    s21_decimal d;
+#test my_is_equal_nok
+    my_decimal d;
     d.bits[0] = 0b11111111111111111111111111111111;
     d.bits[1] = 0b11111111111111111111111111111111;
     d.bits[2] = 0b11111111111111111111111111111111;
     d.bits[3] = 0b11111111111111111111111111111111;
-    s21_decimal res;
+    my_decimal res;
     res.bits[0] = 0b11111111111111111111111111111111;
     res.bits[1] = 0b11111111111111111101111111111111;
     res.bits[2] = 0b11111111111111111111111111111111;
     res.bits[3] = 0b11111111111111111111111111111111;
-    int _res = s21_is_equal(d, res);
+    int _res = my_is_equal(d, res);
     ck_assert_int_eq(FALSE, _res);
 
 
-#test s21_is_not_equal_null
+#test my_is_not_equal_null
 
-    s21_decimal d1 = {0, 0, 0, 0};
-    s21_decimal d2 = {0, 0, 0, 0};
-    int res = s21_is_not_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 0};
+    my_decimal d2 = {0, 0, 0, 0};
+    int res = my_is_not_equal(d1, d2);
     ck_assert_int_eq(res, FALSE);
 
 
-#test s21_is_not_equal_true
+#test my_is_not_equal_true
 
-    s21_decimal d1 = {0, 0, 1, 0};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_not_equal(d1, d2);
+    my_decimal d1 = {0, 0, 1, 0};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_not_equal(d1, d2);
     ck_assert_int_eq(res, FALSE);
 
 
-#test s21_is_not_equal_false
+#test my_is_not_equal_false
 
-    s21_decimal d1 = {0, 0, 0, 1};
-    s21_decimal d2 = {0, 0, 1, 0};
-    int res = s21_is_not_equal(d1, d2);
+    my_decimal d1 = {0, 0, 0, 1};
+    my_decimal d2 = {0, 0, 1, 0};
+    int res = my_is_not_equal(d1, d2);
     ck_assert_int_eq(res, TRUE);
 
 
-#test s21_comparison_operator
-    s21_decimal max = {0};
-    s21_stringToDecimal(&max, S21_MAX_DECIMAL);
-    s21_decimal min = {0};
-    s21_stringToDecimal(&min, S21_MAX_DECIMAL);
-    S21_SET_MINUS(&min);
-    s21_decimal one = {0};
+#test my_comparison_operator
+    my_decimal max = {0};
+    stringToDecimal(&max, MAX_DECIMAL);
+    my_decimal min = {0};
+    stringToDecimal(&min, MAX_DECIMAL);
+    SET_MINUS(&min);
+    my_decimal one = {0};
     one.bits[0] = 0b00000000000000000000000000000001;
-    s21_decimal one_neg = {0};
+    my_decimal one_neg = {0};
     one_neg.bits[0] = 0b00000000000000000000000000000001;
-    S21_SET_MINUS(&one_neg);
-    s21_decimal small = {0};
-    s21_stringToDecimal(&small, S21_MAX_DECIMAL);
-    s21_set_exp(&small, S21_MAX_EXP);
+    SET_MINUS(&one_neg);
+    my_decimal small = {0};
+    stringToDecimal(&small, MAX_DECIMAL);
+    set_exp(&small, MAX_EXP);
     int res = -5;
-    // s21_decimal result = {1, 2, 3, 4};
+    // my_decimal result = {1, 2, 3, 4};
 
     // <
-    ck_assert_int_eq(FALSE, s21_is_less(max, max));
-    ck_assert_int_eq(FALSE, s21_is_less(max, min));
-    ck_assert_int_eq(FALSE, s21_is_less(min, min));
-    ck_assert_int_eq(TRUE, s21_is_less(min, max));
+    ck_assert_int_eq(FALSE, my_is_less(max, max));
+    ck_assert_int_eq(FALSE, my_is_less(max, min));
+    ck_assert_int_eq(FALSE, my_is_less(min, min));
+    ck_assert_int_eq(TRUE, my_is_less(min, max));
 
-    ck_assert_int_eq(FALSE, s21_is_less(max, one));
-    ck_assert_int_eq(FALSE, s21_is_less(max, one_neg));
-    ck_assert_int_eq(TRUE, s21_is_less(min, one));
-    ck_assert_int_eq(TRUE, s21_is_less(min, one_neg));
-    ck_assert_int_eq(FALSE, s21_is_less(small, one));
-    ck_assert_int_eq(FALSE, s21_is_less(small, one_neg));
+    ck_assert_int_eq(FALSE, my_is_less(max, one));
+    ck_assert_int_eq(FALSE, my_is_less(max, one_neg));
+    ck_assert_int_eq(TRUE, my_is_less(min, one));
+    ck_assert_int_eq(TRUE, my_is_less(min, one_neg));
+    ck_assert_int_eq(FALSE, my_is_less(small, one));
+    ck_assert_int_eq(FALSE, my_is_less(small, one_neg));
 
-    ck_assert_int_eq(TRUE, s21_is_less(one, max));
-    ck_assert_int_eq(TRUE, s21_is_less(one_neg, max));
-    ck_assert_int_eq(FALSE, s21_is_less(one, min));
-    ck_assert_int_eq(FALSE, s21_is_less(one_neg, min));
-    ck_assert_int_eq(TRUE, s21_is_less(one, small));
-    ck_assert_int_eq(TRUE, s21_is_less(one_neg, small));
+    ck_assert_int_eq(TRUE, my_is_less(one, max));
+    ck_assert_int_eq(TRUE, my_is_less(one_neg, max));
+    ck_assert_int_eq(FALSE, my_is_less(one, min));
+    ck_assert_int_eq(FALSE, my_is_less(one_neg, min));
+    ck_assert_int_eq(TRUE, my_is_less(one, small));
+    ck_assert_int_eq(TRUE, my_is_less(one_neg, small));
 
-    res = s21_is_less((s21_decimal){0,0,0,0}, (s21_decimal){0,0,0,0});
+    res = my_is_less((my_decimal){0,0,0,0}, (my_decimal){0,0,0,0});
     ck_assert_int_eq(FALSE, res);
 
     // <=
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(max, max));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(max, min));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(min, min));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(min, max));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(max, max));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(max, min));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(min, min));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(min, max));
 
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(max, one));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(max, one_neg));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(min, one));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(min, one_neg));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(small, one));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(small, one_neg));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(max, one));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(max, one_neg));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(min, one));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(min, one_neg));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(small, one));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(small, one_neg));
 
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(one, max));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(one_neg, max));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(one, min));
-    ck_assert_int_eq(FALSE, s21_is_less_or_equal(one_neg, min));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(one, small));
-    ck_assert_int_eq(TRUE, s21_is_less_or_equal(one_neg, small));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(one, max));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(one_neg, max));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(one, min));
+    ck_assert_int_eq(FALSE, my_is_less_or_equal(one_neg, min));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(one, small));
+    ck_assert_int_eq(TRUE, my_is_less_or_equal(one_neg, small));
 
-    res = s21_is_less_or_equal((s21_decimal){0,0,0,0}, (s21_decimal){0,0,0,0});
+    res = my_is_less_or_equal((my_decimal){0,0,0,0}, (my_decimal){0,0,0,0});
     ck_assert_int_eq(TRUE, res);
 
     // >
-    ck_assert_int_eq(FALSE, s21_is_greater(max, max));
-    ck_assert_int_eq(TRUE, s21_is_greater(max, min));
-    ck_assert_int_eq(FALSE, s21_is_greater(min, min));
-    ck_assert_int_eq(FALSE, s21_is_greater(min, max));
+    ck_assert_int_eq(FALSE, my_is_greater(max, max));
+    ck_assert_int_eq(TRUE, my_is_greater(max, min));
+    ck_assert_int_eq(FALSE, my_is_greater(min, min));
+    ck_assert_int_eq(FALSE, my_is_greater(min, max));
 
-    ck_assert_int_eq(TRUE, s21_is_greater(max, one));
-    ck_assert_int_eq(TRUE, s21_is_greater(max, one_neg));
-    ck_assert_int_eq(FALSE, s21_is_greater(min, one));
-    ck_assert_int_eq(FALSE, s21_is_greater(min, one_neg));
-    ck_assert_int_eq(TRUE, s21_is_greater(small, one));
-    ck_assert_int_eq(TRUE, s21_is_greater(small, one_neg));
+    ck_assert_int_eq(TRUE, my_is_greater(max, one));
+    ck_assert_int_eq(TRUE, my_is_greater(max, one_neg));
+    ck_assert_int_eq(FALSE, my_is_greater(min, one));
+    ck_assert_int_eq(FALSE, my_is_greater(min, one_neg));
+    ck_assert_int_eq(TRUE, my_is_greater(small, one));
+    ck_assert_int_eq(TRUE, my_is_greater(small, one_neg));
 
-    ck_assert_int_eq(FALSE, s21_is_greater(one, max));
-    ck_assert_int_eq(FALSE, s21_is_greater(one_neg, max));
-    ck_assert_int_eq(TRUE, s21_is_greater(one, min));
-    ck_assert_int_eq(TRUE, s21_is_greater(one_neg, min));
-    ck_assert_int_eq(FALSE, s21_is_greater(one, small));
-    ck_assert_int_eq(FALSE, s21_is_greater(one_neg, small));
+    ck_assert_int_eq(FALSE, my_is_greater(one, max));
+    ck_assert_int_eq(FALSE, my_is_greater(one_neg, max));
+    ck_assert_int_eq(TRUE, my_is_greater(one, min));
+    ck_assert_int_eq(TRUE, my_is_greater(one_neg, min));
+    ck_assert_int_eq(FALSE, my_is_greater(one, small));
+    ck_assert_int_eq(FALSE, my_is_greater(one_neg, small));
 
-    res = s21_is_greater((s21_decimal){0,0,0,0}, (s21_decimal){0,0,0,0});
+    res = my_is_greater((my_decimal){0,0,0,0}, (my_decimal){0,0,0,0});
     ck_assert_int_eq(FALSE, res);
 
     // >=
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(max, max));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(max, min));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(min, min));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(min, max));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(max, max));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(max, min));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(min, min));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(min, max));
 
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(max, one));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(max, one_neg));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(min, one));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(min, one_neg));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(small, one));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(small, one_neg));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(max, one));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(max, one_neg));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(min, one));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(min, one_neg));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(small, one));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(small, one_neg));
 
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(one, max));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(one_neg, max));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(one, min));
-    ck_assert_int_eq(TRUE, s21_is_greater_or_equal(one_neg, min));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(one, small));
-    ck_assert_int_eq(FALSE, s21_is_greater_or_equal(one_neg, small));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(one, max));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(one_neg, max));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(one, min));
+    ck_assert_int_eq(TRUE, my_is_greater_or_equal(one_neg, min));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(one, small));
+    ck_assert_int_eq(FALSE, my_is_greater_or_equal(one_neg, small));
 
-    res = s21_is_greater_or_equal((s21_decimal){0,0,0,0}, (s21_decimal){0,0,0,0});
+    res = my_is_greater_or_equal((my_decimal){0,0,0,0}, (my_decimal){0,0,0,0});
     ck_assert_int_eq(TRUE, res);
 
 
